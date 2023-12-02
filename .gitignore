@@ -1,0 +1,4 @@
+*.ipynb
+*.ckpt
+./model_checkpoints/*
+./output/*
