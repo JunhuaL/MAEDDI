@@ -9,6 +9,7 @@ pair_file: ./dataset/DrugBank/binary_1vs1/entry_pairs.csv
 label_file: ./dataset/DrugBank/binary_1vs1/pair_labels.csv
 save_folder: ./output/DrugBank/binary_1vs1/one_cluster/
 split_strategy: whole_cluster_sampling
+model_ckpt: ./model_checkpoints/max_epoch_40/last.ckpt
 model_type: deepdrug
 gpus: 0
 num_out_dim: 1

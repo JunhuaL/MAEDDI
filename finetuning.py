@@ -55,6 +55,7 @@ if __name__ == '__main__':
     num_out_dim = args.num_out_dim
     split_strat = args.split_strategy
     model_type = args.model_type
+    model_ckpt = args.model_ckpt
 
     y_transfrom_func = None
 
@@ -99,11 +100,9 @@ if __name__ == '__main__':
                             scheduler_ReduceLROnPlateau_tracking=scheduler_ReduceLROnPlateau_tracking,
                             num_out_dim = num_out_dim, model_type=model_type,
                             )
-    
-    pretrained_weights = './model_checkpoints/max_epoch_40/last.ckpt'
 
     empty_model = PreModel_Container(119,128,22,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
-    empty_model.load_from_checkpoint(pretrained_weights)
+    empty_model.load_from_checkpoint(model_ckpt)
     model.model.gconv1.load_state_dict(empty_model.model.encoder.state_dict())
     model.model.gconv2.load_state_dict(empty_model.model.encoder.state_dict())
 
