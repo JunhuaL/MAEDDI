@@ -10,23 +10,23 @@ from torch import Tensor
 from pytorch_lightning import callbacks as pl_callbacks
 from pytorch_lightning import Trainer
 
-from PreModel import PreModel_Container 
-from dataset import Pretraining_Dataset
+from PreModel import SMILEMAE 
+from dataset import SMILES_DataModule
 from utils import * 
 
 
 if __name__ == '__main__':
     n_epochs = 80
-    save_folder = './dataset/DrugBank_pretraining/drug/'
-    datamodule = Pretraining_Dataset(save_folder,split_strat='sample_from_all_clusters')
+    save_folder = './dataset/DrugBank_pretraining/drug/cleaned_data.csv'
+    datamodule = SMILES_DataModule(save_folder,64,'drug',split_strat='whole_cluster_sampling')
 
-    model = PreModel_Container(119,128,22,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
+    model = SMILEMAE(67,128)
 
     earlystopping_tracking = 'val_loss'
     earlystopping_mode = 'min'
     earlystopping_min_delta = 0.0001
 
-    save_model_folder = f'./model_checkpoints/max_epoch_{n_epochs}_all_cls/'
+    save_model_folder = f'./model_checkpoints/cnn_max_epoch_{n_epochs}_one_cls/'
 
     checkpoint_callback = pl_callbacks.ModelCheckpoint(dirpath=save_model_folder,
                                         mode = earlystopping_mode,

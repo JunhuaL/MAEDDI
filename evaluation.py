@@ -31,6 +31,41 @@ class Split_Strats:
             similarities[:i+1,i] = similarity
         return 1-similarities
         
+    def all_cluster_split_pretrain(self):
+        drugs = self.drug_data
+        drugs['c_label'] = self.cluster_labels
+        selected_data = []
+        for cluster in np.unique(self.cluster_labels):
+            unknown_drugs = drugs[drugs['c_label']==cluster].sample(frac=0.2)
+            selected_data.append(unknown_drugs)
+        selected_drugs = pd.concat(selected_data)
+        train_drugs = drugs[~drugs['drugID'].isin(selected_drugs['drugID'])]['drugID']
+        eval_drugs = selected_drugs['drugID']
+
+        return train_drugs,eval_drugs
+    
+    def chosen_cluster_split_pretrain(self):
+        drugs = self.drug_data
+        drugs['c_label'] = self.cluster_labels
+        train_data = self.drug_data
+        data_ratio = len(train_data)/len(self.drug_data)
+        selected_drugs = []
+        eval_data = []
+        unique_cls = np.unique(self.cluster_labels[self.cluster_labels>-1])
+        eval_cls = []
+        while data_ratio>0.8:
+            clust_id = np.random.choice(unique_cls)
+            eval_cls.append(clust_id)
+            drug_ids = drugs[drugs['c_label'] == clust_id]['drugID'].values
+            drug_entries = train_data[(train_data['drugID'].isin(drug_ids))]
+            train_data = train_data[~train_data['drugID'].isin(drug_ids)]
+            eval_data.append(drug_entries)
+            selected_drugs+=list(drug_ids)
+            data_ratio = len(train_data)/len(self.drug_data)
+        eval_data = pd.concat(eval_data)
+
+        return train_data,eval_data
+
     def one_known_split(self):
         train_data = self.entry_data
         one_out_data = []

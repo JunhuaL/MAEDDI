@@ -1,3 +1,4 @@
+from typing import Any
 import numpy as np 
 import warnings
 warnings.filterwarnings('ignore')
@@ -442,3 +443,196 @@ class PreModel_Container(LightningModule):
                                 factor=0.1, patience=8, verbose=True, 
                                 threshold=0.0001, threshold_mode='abs', )
         return self.my_optimizers 
+
+from DeepGCN import calc_cnn_output
+
+class SMILESEnc2Dec(nn.Module):
+    def __init__(self,in_channel,mid_channel,seq_len=200,dropout_ratio=0.1,mask_ratio=0.75):
+        super(SMILESEnc2Dec,self).__init__()
+        self.in_channel = in_channel
+        self.mid_channel = mid_channel
+        self.seq_len = seq_len
+        self.dropout_ratio = dropout_ratio
+        self.mask_ratio = mask_ratio
+
+        kernels = [4,6,8,8,6,4]
+        encoder_output = calc_cnn_output(seq_len,kernels[:3])
+        decoder_output = calc_cnn_output(seq_len,kernels)
+
+        self.encoder = CNN(self.in_channel,self.mid_channel,self.seq_len,self.dropout_ratio,pretraining=True)
+        self.decoder = CNN(96,self.seq_len,encoder_output,self.dropout_ratio,decoder=True,pretraining=True)
+
+        self.decoder_pred = nn.Linear(decoder_output,seq_len)
+
+    def random_masking(self,x):    
+        N, D, L = x.shape  # batch, dim, length
+        len_keep = int(L * (1 - self.mask_ratio))
+
+        noise = torch.rand(N,1,L, device=x.device)  # noise in [0, 1]
+
+        ids_shuffle = torch.argsort(noise, dim=2)
+        ids_keep = ids_shuffle[:,:,:len_keep]
+
+        mask = torch.zeros(N,D,L,device=x.device)
+        mask.scatter_(2,ids_keep.repeat(1,D,1),1.)
+
+        x_masked = x.clone()
+        x_masked *= mask
+
+        return x_masked
+    
+    def forward(self,x):
+        masked_x = self.random_masking(x).double()
+        embedding = self.encoder(masked_x)
+        latent_recon = self.decoder(embedding)
+        x_recon = self.decoder_pred(latent_recon)
+        return x_recon
+
+class SMILEMAE(LightningModule):
+    def __init__(self,
+                 in_channel,
+                 mid_channel,
+                 seq_len=200,
+                 dropout_ratio=0.1,
+                 mask_ratio=0.75,
+                 lr = 0.001,
+                 verbose=True,
+                 my_logging=False,
+                 scheduler_ReduceLROnPlateau_tracking='mse',
+
+                 ):
+        super().__init__()
+        self.save_hyperparameters()
+        self.verbose = verbose
+        self.my_logging = my_logging
+        self.scheduler_ReduceLROnPlateau_tracking = scheduler_ReduceLROnPlateau_tracking
+        self.lr = lr
+
+        self.loss_func = F.mse_loss
+
+        self.model = SMILESEnc2Dec(in_channel,mid_channel,seq_len=seq_len,dropout_ratio=dropout_ratio,mask_ratio=mask_ratio)
+        
+        if self.verbose: print(self.model,)
+        self.epoch_metrics = Struct(train=[],valid=[],test=[])  
+        self.metric_dict = {}
+
+    def forward(self,batch):
+        return self.model(batch)
+    
+    def training_step(self,batch,batch_idx):
+        y = batch
+        y_out = self(batch)
+
+        loss = self.loss_func(y_out,y)
+
+        self.log('train_loss', loss, prog_bar=False, on_step=False,
+                 on_epoch=True)
+        lr = iter(self.my_optimizers.param_groups).__next__()['lr']
+        self.log('lr', np.round(lr,6), prog_bar=True, on_step=True,
+                 on_epoch=False)
+        
+        return_dict = {'loss':loss,'y':t2np(y),'y_out':t2np(y_out)}
+        return return_dict
+    
+    def validation_step(self, batch, batch_idx):
+        y = batch
+        y_out = self(batch)
+
+        loss = self.loss_func(y_out,y)
+
+        self.log('val_loss', loss, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True)
+
+        return_dict = {'y':t2np(y),'y_out':t2np(y_out)}
+        return return_dict
+    
+    def test_step(self, batch, batch_idx):
+        y = batch
+        y_out = self(batch)
+
+        loss = self.loss_func(y_out,y)
+
+        self.log('test_loss', loss, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True)
+
+        return_dict = {'y':t2np(y),'y_out':t2np(y_out)}
+        return return_dict
+
+    def training_epoch_end(self, outputs):
+        y = np.concatenate([x['y'] for x in outputs])
+        y_out = np.concatenate([x['y_out'] for x in outputs])
+        metric_dict = self.cal_metrics_on_epoch_end(y,y_out,'trn')
+
+        if self.my_logging:
+            self.logger.log_metrics(keep_scalar_func(metric_dict,prefix='epoch_trn'))
+        
+        try: self.epoch_metrics.train.pop(-1)
+        except: pass
+        self.epoch_metrics.train.append(metric_dict)
+
+    def validation_epoch_end(self, outputs):
+        y = np.concatenate([x['y'] for x in outputs])
+        y_out = np.concatenate([x['y_out'] for x in outputs])
+        metric_dict = self.cal_metrics_on_epoch_end(y,y_out,'val')
+        self.log('val_epoch_MSE', metric_dict['mse'], prog_bar=False, on_step=False, on_epoch=True)
+
+        try: self.epoch_metrics.valid.pop(-1)
+        except: pass
+        self.epoch_metrics.valid.append(metric_dict)
+        if self.my_logging:
+            self.logger.log_metrics(keep_scalar_func(metric_dict,prefix='epoch_val'))
+
+        if (len(self.epoch_metrics.train)>0) :
+            self.print_metrics_on_epoch_end(self.epoch_metrics.train[-1])
+        self.print_metrics_on_epoch_end(self.epoch_metrics.valid[-1])
+
+        self.my_schedulers.step(metric_dict[self.scheduler_ReduceLROnPlateau_tracking])
+
+    def test_epoch_end(self, outputs):
+        y = np.concatenate([x['y'] for x in outputs])
+        y_out = np.concatenate([x['y_out'] for x in outputs])
+        metric_dict = self.cal_metrics_on_epoch_end(y,y_out,'tst')
+
+        if self.my_logging:
+            self.logger.log_metrics(keep_scalar_func(metric_dict,prefix='epoch_tst'))
+        
+        try: self.epoch_metrics.test.pop(-1)
+        except: pass
+        self.epoch_metrics.test.append(metric_dict)
+
+        self.print_metrics_on_epoch_end(self.epoch_metrics.test[-1])
+
+    def print_metrics_on_epoch_end(self,metric_dict):
+        try:
+            lr = iter(self.my_optimizers.param_groups).__next__()['lr']
+        except:
+            lr = 0
+        
+        print('\n%s:Ep%04d|| Loss: %.05f\n'%(metric_dict['prefix'],metric_dict['epoch'],metric_dict['mse']))
+
+    def cal_metrics_on_epoch_end(self,y_true,y_pred,prefix,current_epoch=None):
+        loss = ((y_true - y_pred)**2).mean()
+        metric_dict = dict()
+        metric_dict['prefix'] = prefix
+        metric_dict['epoch'] = self.current_epoch if current_epoch is None else current_epoch
+
+        metric_dict['mse'] = loss
+        return metric_dict
+
+    def optimizer_step(self, epoch, batch_idx, optimizer, optimizer_idx,
+                   optimizer_closure, on_tpu, using_native_amp, using_lbfgs):
+
+        # update params
+        optimizer.step(closure=optimizer_closure)
+        optimizer.zero_grad()
+
+    def configure_optimizers(self):
+        self.my_optimizers =  torch.optim.Adam(self.parameters(), lr=self.lr)
+        if self.scheduler_ReduceLROnPlateau_tracking in ['mse',]:
+            mode = 'min'
+        elif self.scheduler_ReduceLROnPlateau_tracking in ['F1','auPRC']:
+            mode = 'max'
+        else: raise 
+        self.my_schedulers = t.optim.lr_scheduler.ReduceLROnPlateau(self.my_optimizers,
+                                mode= mode,#'min',
+                                factor=0.1, patience=8, verbose=True, 
+                                threshold=0.0001, threshold_mode='abs', )
+        return self.my_optimizers

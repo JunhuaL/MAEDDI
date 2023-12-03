@@ -1,0 +1,9 @@
+dropout_ratio: 0.1
+in_channel: 67
+lr: 0.001
+mask_ratio: 0.75
+mid_channel: 128
+my_logging: false
+scheduler_ReduceLROnPlateau_tracking: mse
+seq_len: 200
+verbose: true

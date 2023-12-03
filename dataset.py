@@ -364,7 +364,7 @@ class SeqDataset(data.Dataset):
         self.onehot = onehot
 
         # df = pd.read_csv(data_file,index_col=0,header=0)
-        df = read_df_or_parquet(data_file,save_parquet=False,index_col=0,header=None)
+        df = read_df_or_parquet(data_file,save_parquet=False,index_col=0)
         df.iloc[:,0] = df.iloc[:,0].astype(str)
         df['entry'] = df.iloc[:,0].apply(trans_seqs,max_seq_len=max_len,seq_dict=word_dict,upper=upper)
         print(df.head(4))
@@ -666,13 +666,25 @@ class Pretraining_Dataset(LightningDataModule):
         self.dataset = EntryDataset(self.data_folder)    
         self.dataset.add_node_degree()
         
+        self.data_split = evaluation.Split_Strats(None,self.data_folder+'cleaned_data.csv',clustering='cluster' in self.split_strat)
         #generate train test split indices
         if self.split_strat == 'random':
             num_samples = len(self.dataset)
             tmp_indxs = np.random.permutation(num_samples)
-            self.train_indxs = tmp_indxs[:int(num_samples*0.7)]
-            self.valid_indxs = tmp_indxs[int(num_samples*0.7):int(num_samples*0.8)]
-            self.test_indxs = tmp_indxs[int(num_samples*0.8):]
+            self.train_indxs = tmp_indxs[:int(num_samples*0.8)]
+            self.valid_indxs = tmp_indxs[int(num_samples*0.8):]
+            # self.test_indxs = tmp_indxs[int(num_samples*0.8):]
+        elif self.split_strat == 'sample_from_all_clusters':
+            train,evals = self.data_split.all_cluster_split_pretrain()
+            self.train_indxs = train.index
+            self.valid_indxs = evals.index
+        elif self.split_strat == 'whole_cluster_sampling':
+            train,evals = self.data_split.chosen_cluster_split_pretrain()
+            self.train_indxs = train.index
+            self.valid_indxs = evals.index
+        else:
+            raise
+
     
     def setup(self, stage=None):
         self.my_prepare_data()
@@ -699,3 +711,63 @@ class Pretraining_Dataset(LightningDataModule):
         dataloader = DataLoader(test_split,num_workers=0,shuffle=False,batch_size=64)
         return dataloader
     
+class SMILES_DataModule(LightningDataModule):
+    def __init__(self,datafile,batch_size,data_type,split_strat,max_len=200):
+        super().__init__()
+        self.datafile = datafile
+        self.batch_size = batch_size
+        self.data_type = data_type
+        self.max_len = max_len
+        self.split_strat = split_strat
+    
+    def prepare_data(self):
+        pass
+    
+    def my_prepare_data(self):
+        print(self.data_type)
+        self.dataset = SeqDataset(self.datafile, self.max_len, self.data_type, onehot=True)
+        self.data_split = evaluation.Split_Strats(None,self.datafile,clustering='cluster' in self.split_strat)
+        if self.split_strat == 'random':
+            num_samples = len(self.dataset)
+            tmp_indxs = np.random.permutation(num_samples)
+            self.train_indxs = tmp_indxs[:int(num_samples*0.8)]
+            self.valid_indxs = tmp_indxs[int(num_samples*0.8):]
+        elif self.split_strat == 'sample_from_all_clusters':
+            train,evals = self.data_split.all_cluster_split_pretrain()
+            self.train_indxs = train.index
+            self.valid_indxs = evals.index
+        elif self.split_strat == 'whole_cluster_sampling':
+            train,evals = self.data_split.chosen_cluster_split_pretrain()
+            self.train_indxs = train.index
+            self.valid_indxs = evals.index
+        else:
+            raise
+    
+    def setup(self, stage=None):
+        self.my_prepare_data()
+        pass
+    
+    def train_dataloader(self):
+        print('in train dataloader...')
+        train_ids = self.dataset.entryIDs[self.train_indxs]
+        train_split = SeqDataset(self.datafile, self.max_len, self.data_type, onehot=True)
+        train_split.entryIDs = train_ids
+        train_split.num_samples = len(train_split.entryIDs)
+        dataloader = DataLoader(train_split,num_workers=0,shuffle=True,batch_size=64,pin_memory=True)
+        return dataloader
+    
+    def val_dataloader(self):
+        print('in val dataloader...')
+        valid_ids = self.dataset.entryIDs[self.valid_indxs]
+        valid_split = SeqDataset(self.datafile, self.max_len, self.data_type, onehot=True)
+        valid_split.entryIDs = valid_ids
+        valid_split.num_samples = len(valid_split.entryIDs)
+        dataloader = DataLoader(valid_split,num_workers=0,shuffle=False,batch_size=64)
+        return dataloader
+    
+    def test_dataloader(self):
+        print('in test dataloader...')
+        test_ids = self.dataset.entryIDs[self.test_indxs]
+        test_split = SeqDataset(self.datafile, self.max_len, self.data_type, onehot=True)
+        dataloader = DataLoader(test_split,num_workers=0,shuffle=False,batch_size=64)
+        return dataloader

@@ -26,8 +26,6 @@ from utils import *
 from metrics import  (evaluate_binary,evaluate_multiclass,evaluate_multilabel,evaluate_regression)
 from DeepGCN import *
 
-def structDict(**argvs):
-    return argvs
 from torch.nn.init import uniform_,zeros_,xavier_normal_
 @torch.no_grad()
 def init_linear(m):
@@ -51,64 +49,6 @@ class MyCrossEntropyLoss(t.nn.Module):
         '''
         output = t.log(output+ 1e-10)
         return self.loss(output,target)
-
-
-class CNN(nn.Sequential):
-    def __init__(self,in_channel,mid_channel,seq_len,dropout_ratio=0.1):
-        super(CNN, self).__init__()
-        self.seq_len= seq_len 
-        in_channel = in_channel
-
-        encoding = 'drug'
-        config = structDict( 
-                         cls_hidden_dims = [1024,1024,512], 
-                         cnn_drug_filters = [32,64,96],
-                         cnn_target_filters = [32,64,96],
-                         cnn_drug_kernels = [4,6,8],
-                         cnn_target_kernels = [4,8,12]
-                        )
-        if encoding == 'drug':
-            in_ch = [in_channel] + config['cnn_drug_filters']
-            kernels = config['cnn_drug_kernels']
-            layer_size = len(config['cnn_drug_filters'])
-            self.conv = nn.ModuleList([nn.Conv1d(in_channels = in_ch[i], 
-                                                    out_channels = in_ch[i+1], 
-                                                    kernel_size = kernels[i]) for i in range(layer_size)])
-            self.conv = self.conv.double()
-            n_size_d = self._get_conv_output(( in_channel,seq_len,))
-            #n_size_d = 1000
-            self.fc1 = nn.Linear(n_size_d, mid_channel)
-
-        if encoding == 'protein':
-            in_ch = [in_channel] + config['cnn_target_filters']
-            kernels = config['cnn_target_kernels']
-            layer_size = len(config['cnn_target_filters'])
-            self.conv = nn.ModuleList([nn.Conv1d(in_channels = in_ch[i], 
-                                                    out_channels = in_ch[i+1], 
-                                                    kernel_size = kernels[i]) for i in range(layer_size)])
-            self.conv = self.conv.double()
-            n_size_p = self._get_conv_output(( in_channel,seq_len,))
-
-            self.fc1 = nn.Linear(n_size_p, mid_channel)
-
-    def _get_conv_output(self, shape):
-        bs = 1
-        input = Variable(torch.rand(bs, *shape))
-        output_feat = self._forward_features(input.double())
-        n_size = output_feat.data.view(bs, -1).size(1)
-        return n_size
-
-    def _forward_features(self, x):
-        for l in self.conv:
-            x = F.relu(l(x))
-        x = F.adaptive_max_pool1d(x, output_size=1)
-        return x
-
-    def forward(self, v):
-        v = self._forward_features(v.double())
-        v = v.view(v.size(0), -1)
-        v = self.fc1(v.float())
-        return v
 
 # Modified DeepDrug Model
 class DeepDrug(nn.Module):

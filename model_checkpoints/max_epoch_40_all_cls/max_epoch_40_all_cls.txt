@@ -1,0 +1,322 @@
+PreModel(
+  (encoder): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+        (4): DeepGCNLayerV2(block=res+)
+        (5): DeepGCNLayerV2(block=res+)
+        (6): DeepGCNLayerV2(block=res+)
+        (7): DeepGCNLayerV2(block=res+)
+        (8): DeepGCNLayerV2(block=res+)
+        (9): DeepGCNLayerV2(block=res+)
+        (10): DeepGCNLayerV2(block=res+)
+        (11): DeepGCNLayerV2(block=res+)
+        (12): DeepGCNLayerV2(block=res+)
+        (13): DeepGCNLayerV2(block=res+)
+        (14): DeepGCNLayerV2(block=res+)
+        (15): DeepGCNLayerV2(block=res+)
+        (16): DeepGCNLayerV2(block=res+)
+        (17): DeepGCNLayerV2(block=res+)
+        (18): DeepGCNLayerV2(block=res+)
+        (19): DeepGCNLayerV2(block=res+)
+        (20): DeepGCNLayerV2(block=res+)
+        (21): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=11, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (decoder): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=128, out_features=121, bias=True)
+      (1): LayerNorm((121,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=128, out_features=11, bias=True)
+      (1): LayerNorm((11,), eps=1e-05, elementwise_affine=True)
+    )
+    (edge_decoder): Linear(in_features=121, out_features=11, bias=True)
+  )
+  (encoder2decoder_nodes): Linear(in_features=128, out_features=128, bias=False)
+  (encoder2decoder_edges): Linear(in_features=128, out_features=128, bias=False)
+)
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+Missing logger folder: model_checkpoints\max_epoch_40_all_cls\lightning_logs
+loading processed data...
+add degrees as node features for each sample...
+[23:12:04] Unusual charge on atom 0 number of radical electrons set to zero
+[23:12:05] WARNING: not removing hydrogen atom without neighbors
+[23:12:05] WARNING: not removing hydrogen atom without neighbors
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+
+  | Name      | Type        | Params
+------------------------------------------
+0 | loss_func | My_MSE_Loss | 0
+1 | model     | PreModel    | 3.4 M
+------------------------------------------
+3.4 M     Trainable params
+0         Non-trainable params
+3.4 M     Total params
+13.755    Total estimated model params size (MB)
+Sanity Checking: 0it [00:00, ?it/s]in val dataloader...
+Sanity Checking DataLoader 0: 100%|██████████████| 2/2 [00:01<00:00,  1.11it/s]
+val:Ep0000|| Loss: 1.08293
+
+in train dataloader...
+Epoch 0: 100%|█| 154/154 [00:14<00:00, 10.55it/s, loss=0.053, v_num=0, lr=0.001
+val:Ep0000|| Loss: 0.0495400%|█████████████████| 31/31 [00:01<00:00, 25.96it/s]
+
+Epoch 1: 100%|█| 154/154 [00:14<00:00, 10.45it/s, loss=0.0251, v_num=0, lr=0.00
+trn:Ep0000|| Loss: 0.1327900%|█████████████████| 31/31 [00:01<00:00, 26.00it/s]
+
+
+val:Ep0001|| Loss: 0.02389
+
+Epoch 2: 100%|█| 154/154 [00:14<00:00, 10.50it/s, loss=0.0186, v_num=0, lr=0.00
+trn:Ep0001|| Loss: 0.0338100%|█████████████████| 31/31 [00:01<00:00, 26.20it/s]
+
+
+val:Ep0002|| Loss: 0.01843
+
+Epoch 3: 100%|█| 154/154 [00:15<00:00, 10.19it/s, loss=0.0157, v_num=0, lr=0.00
+trn:Ep0002|| Loss: 0.0208800%|█████████████████| 31/31 [00:01<00:00, 25.03it/s]
+
+
+val:Ep0003|| Loss: 0.01548
+
+Epoch 4: 100%|█| 154/154 [00:15<00:00, 10.19it/s, loss=0.0143, v_num=0, lr=0.00
+trn:Ep0003|| Loss: 0.0168300%|█████████████████| 31/31 [00:01<00:00, 26.10it/s]
+
+
+val:Ep0004|| Loss: 0.01412
+
+Epoch 5: 100%|█| 154/154 [00:14<00:00, 10.38it/s, loss=0.0139, v_num=0, lr=0.00
+trn:Ep0004|| Loss: 0.0149500%|█████████████████| 31/31 [00:01<00:00, 26.20it/s]
+
+
+val:Ep0005|| Loss: 0.01328
+
+Epoch 6: 100%|█| 154/154 [00:14<00:00, 10.59it/s, loss=0.0128, v_num=0, lr=0.00
+trn:Ep0005|| Loss: 0.0139800%|█████████████████| 31/31 [00:01<00:00, 26.16it/s]
+
+
+val:Ep0006|| Loss: 0.01271
+
+Epoch 7: 100%|█| 154/154 [00:14<00:00, 10.74it/s, loss=0.0119, v_num=0, lr=0.00
+trn:Ep0006|| Loss: 0.0129600%|█████████████████| 31/31 [00:01<00:00, 26.51it/s]
+
+
+val:Ep0007|| Loss: 0.01148
+
+Epoch 8: 100%|█| 154/154 [00:14<00:00, 10.68it/s, loss=0.0115, v_num=0, lr=0.00
+trn:Ep0007|| Loss: 0.0121300%|█████████████████| 31/31 [00:01<00:00, 26.33it/s]
+
+
+val:Ep0008|| Loss: 0.01137
+
+Epoch 9: 100%|█| 154/154 [00:14<00:00, 10.69it/s, loss=0.0113, v_num=0, lr=0.00
+trn:Ep0008|| Loss: 0.0115900%|█████████████████| 31/31 [00:01<00:00, 26.35it/s]
+
+
+val:Ep0009|| Loss: 0.01062
+
+Epoch 10: 100%|█| 154/154 [00:14<00:00, 10.42it/s, loss=0.0105, v_num=0, lr=0.0
+trn:Ep0009|| Loss: 0.0111100%|█████████████████| 31/31 [00:01<00:00, 26.08it/s]
+
+
+val:Ep0010|| Loss: 0.01023
+
+Epoch 11: 100%|█| 154/154 [00:14<00:00, 10.38it/s, loss=0.0102, v_num=0, lr=0.0
+trn:Ep0010|| Loss: 0.0107300%|█████████████████| 31/31 [00:01<00:00, 26.12it/s]
+
+
+val:Ep0011|| Loss: 0.01025
+
+Epoch 12: 100%|█| 154/154 [00:14<00:00, 10.28it/s, loss=0.0099, v_num=0, lr=0.0
+trn:Ep0011|| Loss: 0.0103300%|█████████████████| 31/31 [00:01<00:00, 25.07it/s]
+
+
+val:Ep0012|| Loss: 0.00997
+
+Epoch 13: 100%|█| 154/154 [00:14<00:00, 10.31it/s, loss=0.00942, v_num=0, lr=0.
+trn:Ep0012|| Loss: 0.0099900%|█████████████████| 31/31 [00:01<00:00, 25.85it/s]
+
+
+val:Ep0013|| Loss: 0.00963
+
+Epoch 14: 100%|█| 154/154 [00:14<00:00, 10.29it/s, loss=0.00936, v_num=0, lr=0.
+trn:Ep0013|| Loss: 0.0096700%|█████████████████| 31/31 [00:01<00:00, 25.74it/s]
+
+
+val:Ep0014|| Loss: 0.00920
+
+Epoch 15: 100%|█| 154/154 [00:14<00:00, 10.51it/s, loss=0.00899, v_num=0, lr=0.
+trn:Ep0014|| Loss: 0.0094900%|█████████████████| 31/31 [00:01<00:00, 25.63it/s]
+
+
+val:Ep0015|| Loss: 0.00933
+
+Epoch 16: 100%|█| 154/154 [00:14<00:00, 10.43it/s, loss=0.00878, v_num=0, lr=0.
+trn:Ep0015|| Loss: 0.0092600%|█████████████████| 31/31 [00:01<00:00, 25.45it/s]
+
+
+val:Ep0016|| Loss: 0.00884
+
+Epoch 17: 100%|█| 154/154 [00:14<00:00, 10.42it/s, loss=0.00879, v_num=0, lr=0.
+trn:Ep0016|| Loss: 0.0090200%|█████████████████| 31/31 [00:01<00:00, 25.79it/s]
+
+
+val:Ep0017|| Loss: 0.00864
+
+Epoch 18: 100%|█| 154/154 [00:14<00:00, 10.27it/s, loss=0.00868, v_num=0, lr=0.
+trn:Ep0017|| Loss: 0.0088600%|█████████████████| 31/31 [00:01<00:00, 25.74it/s]
+
+
+val:Ep0018|| Loss: 0.00850
+
+Epoch 19: 100%|█| 154/154 [00:14<00:00, 10.45it/s, loss=0.00827, v_num=0, lr=0.
+trn:Ep0018|| Loss: 0.0085400%|█████████████████| 31/31 [00:01<00:00, 25.92it/s]
+
+
+val:Ep0019|| Loss: 0.00842
+
+Epoch 20: 100%|█| 154/154 [00:15<00:00,  9.98it/s, loss=0.00804, v_num=0, lr=0.
+trn:Ep0019|| Loss: 0.0083100%|█████████████████| 31/31 [00:01<00:00, 25.35it/s]
+
+
+val:Ep0020|| Loss: 0.00805
+
+Epoch 21: 100%|█| 154/154 [00:15<00:00, 10.00it/s, loss=0.00819, v_num=0, lr=0.
+trn:Ep0020|| Loss: 0.0081300%|█████████████████| 31/31 [00:01<00:00, 24.41it/s]
+
+
+val:Ep0021|| Loss: 0.00777
+
+Epoch 22: 100%|█| 154/154 [00:14<00:00, 10.38it/s, loss=0.00785, v_num=0, lr=0.
+trn:Ep0021|| Loss: 0.0080600%|█████████████████| 31/31 [00:01<00:00, 25.83it/s]
+
+
+val:Ep0022|| Loss: 0.00788
+
+Epoch 23: 100%|█| 154/154 [00:14<00:00, 10.28it/s, loss=0.00776, v_num=0, lr=0.
+trn:Ep0022|| Loss: 0.0079300%|█████████████████| 31/31 [00:01<00:00, 25.39it/s]
+
+
+val:Ep0023|| Loss: 0.00804
+
+Epoch 24: 100%|█| 154/154 [00:14<00:00, 10.44it/s, loss=0.00773, v_num=0, lr=0.
+trn:Ep0023|| Loss: 0.0078900%|█████████████████| 31/31 [00:01<00:00, 25.47it/s]
+
+
+val:Ep0024|| Loss: 0.00791
+
+Epoch 25: 100%|█| 154/154 [00:14<00:00, 10.39it/s, loss=0.00762, v_num=0, lr=0.
+trn:Ep0024|| Loss: 0.0077800%|█████████████████| 31/31 [00:01<00:00, 25.83it/s]
+
+
+val:Ep0025|| Loss: 0.00766
+
+Epoch 26: 100%|█| 154/154 [00:14<00:00, 10.41it/s, loss=0.00757, v_num=0, lr=0.
+trn:Ep0025|| Loss: 0.0077700%|█████████████████| 31/31 [00:01<00:00, 25.60it/s]
+
+
+val:Ep0026|| Loss: 0.00769
+
+Epoch 27: 100%|█| 154/154 [00:14<00:00, 10.43it/s, loss=0.00737, v_num=0, lr=0.
+trn:Ep0026|| Loss: 0.0077100%|█████████████████| 31/31 [00:01<00:00, 26.05it/s]
+
+
+val:Ep0027|| Loss: 0.00761
+
+Epoch 28: 100%|█| 154/154 [00:14<00:00, 10.32it/s, loss=0.00757, v_num=0, lr=0.
+trn:Ep0027|| Loss: 0.0075800%|█████████████████| 31/31 [00:01<00:00, 25.86it/s]
+
+
+val:Ep0028|| Loss: 0.00734
+
+Epoch 29: 100%|█| 154/154 [00:15<00:00,  9.91it/s, loss=0.00758, v_num=0, lr=0.
+trn:Ep0028|| Loss: 0.0076000%|█████████████████| 31/31 [00:01<00:00, 23.67it/s]
+
+
+val:Ep0029|| Loss: 0.00735
+
+Epoch 30: 100%|█| 154/154 [00:15<00:00, 10.19it/s, loss=0.00776, v_num=0, lr=0.
+trn:Ep0029|| Loss: 0.0075200%|█████████████████| 31/31 [00:01<00:00, 25.30it/s]
+
+
+val:Ep0030|| Loss: 0.00758
+
+Epoch 31: 100%|███████| 154/154 [00:14<00:00, 10.37it/s, loss=0.00736, v_num=0, lr=0.001, val_loss=0.00758]
+trn:Ep0030|| Loss: 0.0075100%|█████████████████████████████████████████████| 31/31 [00:01<00:00, 25.83it/s]
+
+
+val:Ep0031|| Loss: 0.00751
+
+Epoch 32: 100%|███████| 154/154 [00:15<00:00, 10.25it/s, loss=0.00738, v_num=0, lr=0.001, val_loss=0.00751]
+trn:Ep0031|| Loss: 0.0074600%|█████████████████████████████████████████████| 31/31 [00:01<00:00, 25.62it/s]
+
+
+val:Ep0032|| Loss: 0.00730
+
+Epoch 33: 100%|███████| 154/154 [00:15<00:00, 10.07it/s, loss=0.00736, v_num=0, lr=0.001, val_loss=0.00729]
+trn:Ep0032|| Loss: 0.0073900%|█████████████████████████████████████████████| 31/31 [00:01<00:00, 25.39it/s]
+
+
+val:Ep0033|| Loss: 0.00729
+
+Epoch 34: 100%|███████| 154/154 [00:15<00:00, 10.23it/s, loss=0.00729, v_num=0, lr=0.001, val_loss=0.00729]
+trn:Ep0033|| Loss: 0.0074100%|█████████████████████████████████████████████| 31/31 [00:01<00:00, 25.63it/s]
+
+
+val:Ep0034|| Loss: 0.00728
+
+Epoch 35: 100%|███████| 154/154 [00:14<00:00, 10.36it/s, loss=0.00764, v_num=0, lr=0.001, val_loss=0.00728]
+trn:Ep0034|| Loss: 0.0074700%|█████████████████████████████████████████████| 31/31 [00:01<00:00, 26.12it/s]
+
+
+val:Ep0035|| Loss: 0.00723
+
+Epoch 36: 100%|███████| 154/154 [00:14<00:00, 10.44it/s, loss=0.00725, v_num=0, lr=0.001, val_loss=0.00723]
+trn:Ep0035|| Loss: 0.0073300%|█████████████████████████████████████████████| 31/31 [00:01<00:00, 26.03it/s]
+
+
+val:Ep0036|| Loss: 0.00713
+
+Epoch 37: 100%|████████| 154/154 [00:14<00:00, 10.44it/s, loss=0.0072, v_num=0, lr=0.001, val_loss=0.00713]
+trn:Ep0036|| Loss: 0.0072900%|█████████████████████████████████████████████| 31/31 [00:01<00:00, 25.90it/s]
+
+
+val:Ep0037|| Loss: 0.00730
+
+Epoch 38: 100%|████████| 154/154 [00:14<00:00, 10.45it/s, loss=0.00727, v_num=0, lr=0.001, val_loss=0.0073]
+trn:Ep0037|| Loss: 0.0072300%|█████████████████████████████████████████████| 31/31 [00:01<00:00, 25.87it/s]
+
+
+val:Ep0038|| Loss: 0.00722
+
+Epoch 39: 100%|███████| 154/154 [00:14<00:00, 10.39it/s, loss=0.00737, v_num=0, lr=0.001, val_loss=0.00722]
+trn:Ep0038|| Loss: 0.0072100%|█████████████████████████████████████████████| 31/31 [00:01<00:00, 25.73it/s]
+
+
+val:Ep0039|| Loss: 0.00735
+
+Epoch 39: 100%|███████| 154/154 [00:15<00:00, 10.23it/s, loss=0.00737, v_num=0, lr=0.001, val_loss=0.00735]`
+Trainer.fit` stopped: `max_epochs=40` reached.
+Epoch 39: 100%|███████| 154/154 [00:15<00:00, 10.08it/s, loss=0.00737, v_num=0, lr=0.001, val_loss=0.00735]
