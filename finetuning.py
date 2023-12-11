@@ -10,7 +10,7 @@ import torch as t
 from torch import Tensor
 from pytorch_lightning import callbacks as pl_callbacks
 from pytorch_lightning import Trainer
-from PreModel import PreModel_Container
+from PreModel import PreModel_Container, SMILEMAE
 from LinEvalModel import DeepDrug_Container
 from dataset import DeepDrug_Dataset
 from utils import * 
@@ -55,7 +55,9 @@ if __name__ == '__main__':
     num_out_dim = args.num_out_dim
     split_strat = args.split_strategy
     model_type = args.model_type
-    model_ckpt = args.model_ckpt
+    gconv_ckpt = args.gconv_ckpt
+    cnn_ckpt = args.cnn_ckpt
+    lin_Eval = args.lin_eval
 
     y_transfrom_func = None
 
@@ -101,10 +103,25 @@ if __name__ == '__main__':
                             num_out_dim = num_out_dim, model_type=model_type,
                             )
 
-    empty_model = PreModel_Container(119,128,22,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
-    empty_model.load_from_checkpoint(model_ckpt)
-    model.model.gconv1.load_state_dict(empty_model.model.encoder.state_dict())
-    model.model.gconv2.load_state_dict(empty_model.model.encoder.state_dict())
+    empty_rgcn = PreModel_Container(119,128,22,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
+    empty_rgcn.load_from_checkpoint(gconv_ckpt)
+    model.model.gconv1.load_state_dict(empty_rgcn.model.encoder.state_dict())
+    model.model.gconv2.load_state_dict(empty_rgcn.model.encoder.state_dict())
+
+    empty_conv = SMILEMAE(67,128)
+    empty_conv.load_from_checkpoint(cnn_ckpt)
+    model.model.gconv1_seq.conv.load_state_dict(empty_conv.model.encoder.conv.state_dict())
+    model.model.gconv2_seq.conv.load_state_dict(empty_conv.model.encoder.conv.state_dict())
+
+    if lin_Eval:
+        for param in model.model.gconv1.parameters():
+            param.requires_grad = False
+        for param in model.model.gconv2.parameters():
+            param.requires_grad = False
+        for param in model.model.gconv1_seq.conv.parameters():
+            param.requires_grad = False
+        for param in model.model.gconv2_seq.conv.parameters():
+            param.requires_grad = False
 
     if earlystopping_tracking in ['val_loss',]:
         earlystopping_tracking = earlystopping_tracking
@@ -127,7 +144,7 @@ if __name__ == '__main__':
     trainer = Trainer(
                     gpus=[gpus,],
                     accelerator=None,
-                    max_epochs=100, min_epochs=5,
+                    max_epochs=50, min_epochs=5,
                     default_root_dir= save_folder,
                     fast_dev_run=False,
                     check_val_every_n_epoch=1,
@@ -142,7 +159,7 @@ if __name__ == '__main__':
     model = model.load_from_checkpoint(checkpoint_callback.best_model_path,verbose=True)
     model.eval()    
     
-    trainer.test(model,datamodule=datamodule,)
+    trainer.test(model,dataloaders=datamodule.test_dataloader(),)
     y_pred = trainer.predict(model,dataloaders =datamodule.test_dataloader())
     y_true = np.array(datamodule.pair_labels[datamodule.test_indexs])
 

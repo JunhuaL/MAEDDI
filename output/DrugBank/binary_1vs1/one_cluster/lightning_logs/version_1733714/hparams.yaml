@@ -1,9 +1,0 @@
-num_out_dim: 1
-task_type: binary
-lr: 0.001
-category: DDI
-verbose: true
-my_logging: false
-scheduler_ReduceLROnPlateau_tracking: F1
-model_type: deepdrug
-linEval: false

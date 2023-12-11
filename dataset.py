@@ -454,7 +454,7 @@ class DeepDrug_Dataset(LightningDataModule):
                             'multi_classification','multi_label_classification',
                             'multilabel_classification','multiclass','multilabel',
                             ]
-
+        self.has_setup_fit = False
         self.task_type = task_type
         self.entry1_data_folder = entry1_data_folder
         self.entry2_data_folder = entry2_data_folder
@@ -614,7 +614,9 @@ class DeepDrug_Dataset(LightningDataModule):
                 raise ValueError(self.split_strat +"is not an available split strategy.")
 
     def setup(self, stage = None):
-        self.my_prepare_data()
+        if not self.has_setup_fit:
+            self.my_prepare_data()
+            self.has_setup_fit = True
         pass
 
     def train_dataloader(self):

@@ -67,7 +67,7 @@ class DeepDrug(nn.Module):
                                  mid_edge_channel=mid_edge_channel,aggr='softmax')
         dim_gconv1_out = enc_num_hidden
         
-        self.gconv1_seq = CNN(len(smile_dict),enc_num_hidden,seq_len=entry1_seq_len)
+        self.gconv1_seq = CNN(len(smile_dict),enc_num_hidden,seq_len=entry1_seq_len,decoder=False,pretraining=False)
         dim_gconv1_seq_out = enc_num_hidden
         dim_gconv1_out += dim_gconv1_seq_out
 
@@ -346,7 +346,7 @@ class DeepDrug_Container(LightningModule):
 
 
     def configure_optimizers(self):
-        self.my_optimizers =  torch.optim.Adam(self.parameters(), lr=self.lr)
+        self.my_optimizers =  torch.optim.Adam(filter(lambda p : p.requires_grad, self.parameters()), lr=self.lr)
 
         if self.scheduler_ReduceLROnPlateau_tracking in ['mse',]:
             mode = 'min'

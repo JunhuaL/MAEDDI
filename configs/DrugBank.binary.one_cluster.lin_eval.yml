@@ -11,7 +11,7 @@ save_folder: ./output/DrugBank/binary_1vs1/one_cluster/
 split_strategy: whole_cluster_sampling
 gconv_ckpt: ./model_checkpoints/max_epoch_80_one_cls/last.ckpt
 cnn_ckpt: ./model_checkpoints/cnn_max_epoch_80_one_cls/last.ckpt
-lin_eval: False
+lin_eval: True
 model_type: deepdrug
 gpus: 0
 num_out_dim: 1

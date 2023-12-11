@@ -7,11 +7,11 @@ entry1_seq_file: ./dataset/DrugBank/drug/drug.csv
 entry2_seq_file: ./dataset/DrugBank/drug/drug.csv
 pair_file: ./dataset/DrugBank/binary_1vs1/entry_pairs.csv
 label_file: ./dataset/DrugBank/binary_1vs1/pair_labels.csv
-save_folder: ./output/DrugBank/binary_1vs1/one_cluster/
-split_strategy: whole_cluster_sampling
-gconv_ckpt: ./model_checkpoints/max_epoch_80_one_cls/last.ckpt
-cnn_ckpt: ./model_checkpoints/cnn_max_epoch_80_one_cls/last.ckpt
-lin_eval: False
+save_folder: ./output/DrugBank/binary_1vs1/all_cluster/
+split_strategy: sample_from_all_clusters
+gconv_ckpt: ./model_checkpoints/max_epoch_80_all_cls/last.ckpt
+cnn_ckpt: ./model_checkpoints/cnn_max_epoch_80_all_cls/last.ckpt
+lin_eval: True
 model_type: deepdrug
 gpus: 0
 num_out_dim: 1
