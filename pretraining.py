@@ -1,4 +1,5 @@
 import os
+import sys
 import warnings
 import numpy as np
 import yaml
@@ -16,17 +17,19 @@ from utils import *
 
 
 if __name__ == '__main__':
-    n_epochs = 80
+    n_epochs = int(sys.argv[1])
+    n_layers = int(sys.argv[2])
+    split_strat = str(sys.argv[3])
     save_folder = './dataset/DrugBank_pretraining/drug/'
     datamodule = Pretraining_Dataset(save_folder,split_strat='sample_from_all_clusters')
 
-    model = PreModel_Container(119,128,22,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
+    model = PreModel_Container(119,128,n_layers,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
 
     earlystopping_tracking = 'val_loss'
     earlystopping_mode = 'min'
     earlystopping_min_delta = 0.0001
 
-    save_model_folder = f'./model_checkpoints/max_epoch_{n_epochs}_all_cls/'
+    save_model_folder = f'./model_checkpoints/epoch_{n_epochs}_layers_{n_layers}_all_cls/'
 
     checkpoint_callback = pl_callbacks.ModelCheckpoint(dirpath=save_model_folder,
                                         mode = earlystopping_mode,
@@ -46,5 +49,6 @@ if __name__ == '__main__':
                     check_val_every_n_epoch=1,
                     callbacks=[checkpoint_callback,]
                         #     earlystop_callback,],
+                    ,enable_progress_bar=False
                     )
     trainer.fit(model, datamodule=datamodule,)

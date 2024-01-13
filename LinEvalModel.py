@@ -137,7 +137,7 @@ class DeepDrug_Container(LightningModule):
     def __init__(self,num_out_dim=1, task_type = 'multi_classification',
                  lr = 0.001, category = None, verbose=True, my_logging=False, 
                  scheduler_ReduceLROnPlateau_tracking='mse',
-                 model_type = 'deepdrug', linEval=False):
+                 model_type = 'deepdrug', linEval=False, n_layers=22):
         super().__init__()
 
         self.save_hyperparameters()
@@ -152,11 +152,12 @@ class DeepDrug_Container(LightningModule):
         self.task_type = task_type
         self.num_classes = num_out_dim
         self.model_type = model_type
+        self.n_layers = n_layers
 
         self.category = category
         if self.category == 'DDI':
             self.entry2_type= 'drug' 
-            self.entry2_num_graph_layer= 22
+            self.entry2_num_graph_layer= self.n_layers
             self.entry2_seq_len= 200
             self.entry2_in_channel=  119 + 2 
             self.entry2_in_edge_channel= 11 
@@ -176,7 +177,7 @@ class DeepDrug_Container(LightningModule):
             self.model = DeepDrug(num_out_dim=num_out_dim,out_activation_func = out_activation_func,
                                 in_dim=self.entry2_in_channel,enc_num_hidden=128,num_layers=self.entry2_num_graph_layer,
                                 entry1_seq_len=self.entry2_seq_len,in_edge_channel=self.entry2_in_edge_channel,
-                                mid_edge_channel=128, linEval = linEval,
+                                mid_edge_channel=128, linEval = linEval,dropout_ratio=0.2
                                 )
         else:
             raise

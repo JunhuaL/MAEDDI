@@ -444,7 +444,7 @@ class PairedDataset_v1(t.utils.data.Dataset):#需要继承data.Dataset
 
 class DeepDrug_Dataset(LightningDataModule):
     def __init__(self,entry1_data_folder,entry2_data_folder,entry_pairs_file,
-        pair_labels_file,cv_file=None,cv_fold=0,batch_size=128,task_type='binary', n_confs=0,
+        pair_labels_file,cv_file=None,cv_fold=0,batch_size=256,task_type='binary', n_confs=0,
         y_transfrom_func=None,category=None,entry1_seq_file=None, entry2_seq_file = None,
         split_strat='random'):  
         

@@ -1,0 +1,643 @@
+PreModel(
+  (encoder): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=11, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (decoder): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=128, out_features=121, bias=True)
+      (1): LayerNorm((121,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=128, out_features=11, bias=True)
+      (1): LayerNorm((11,), eps=1e-05, elementwise_affine=True)
+    )
+    (edge_decoder): Linear(in_features=121, out_features=11, bias=True)
+  )
+  (encoder2decoder_nodes): Linear(in_features=128, out_features=128, bias=False)
+  (encoder2decoder_edges): Linear(in_features=128, out_features=128, bias=False)
+)
+loading processed data...
+add degrees as node features for each sample...
+in val dataloader...
+
+val:Ep0000|| Loss: 1.50851
+
+in train dataloader...
+
+val:Ep0000|| Loss: 0.03774
+
+
+trn:Ep0000|| Loss: 0.11495
+
+
+val:Ep0001|| Loss: 0.02178
+
+
+trn:Ep0001|| Loss: 0.02762
+
+
+val:Ep0002|| Loss: 0.01825
+
+
+trn:Ep0002|| Loss: 0.01967
+
+
+val:Ep0003|| Loss: 0.01590
+
+
+trn:Ep0003|| Loss: 0.01711
+
+
+val:Ep0004|| Loss: 0.01413
+
+
+trn:Ep0004|| Loss: 0.01526
+
+
+val:Ep0005|| Loss: 0.01297
+
+
+trn:Ep0005|| Loss: 0.01388
+
+
+val:Ep0006|| Loss: 0.01205
+
+
+trn:Ep0006|| Loss: 0.01278
+
+
+val:Ep0007|| Loss: 0.01168
+
+
+trn:Ep0007|| Loss: 0.01200
+
+
+val:Ep0008|| Loss: 0.01145
+
+
+trn:Ep0008|| Loss: 0.01150
+
+
+val:Ep0009|| Loss: 0.01082
+
+
+trn:Ep0009|| Loss: 0.01117
+
+
+val:Ep0010|| Loss: 0.01023
+
+
+trn:Ep0010|| Loss: 0.01057
+
+
+val:Ep0011|| Loss: 0.01043
+
+
+trn:Ep0011|| Loss: 0.01036
+
+
+val:Ep0012|| Loss: 0.00965
+
+
+trn:Ep0012|| Loss: 0.01005
+
+
+val:Ep0013|| Loss: 0.00935
+
+
+trn:Ep0013|| Loss: 0.00976
+
+
+val:Ep0014|| Loss: 0.00942
+
+
+trn:Ep0014|| Loss: 0.00945
+
+
+val:Ep0015|| Loss: 0.00904
+
+
+trn:Ep0015|| Loss: 0.00933
+
+
+val:Ep0016|| Loss: 0.00903
+
+
+trn:Ep0016|| Loss: 0.00923
+
+
+val:Ep0017|| Loss: 0.00884
+
+
+trn:Ep0017|| Loss: 0.00893
+
+
+val:Ep0018|| Loss: 0.00871
+
+
+trn:Ep0018|| Loss: 0.00880
+
+
+val:Ep0019|| Loss: 0.00878
+
+
+trn:Ep0019|| Loss: 0.00870
+
+
+val:Ep0020|| Loss: 0.00826
+
+
+trn:Ep0020|| Loss: 0.00856
+
+
+val:Ep0021|| Loss: 0.00833
+
+
+trn:Ep0021|| Loss: 0.00851
+
+
+val:Ep0022|| Loss: 0.00810
+
+
+trn:Ep0022|| Loss: 0.00844
+
+
+val:Ep0023|| Loss: 0.00832
+
+
+trn:Ep0023|| Loss: 0.00840
+
+
+val:Ep0024|| Loss: 0.00800
+
+
+trn:Ep0024|| Loss: 0.00818
+
+
+val:Ep0025|| Loss: 0.00805
+
+
+trn:Ep0025|| Loss: 0.00814
+
+
+val:Ep0026|| Loss: 0.00788
+
+
+trn:Ep0026|| Loss: 0.00809
+
+
+val:Ep0027|| Loss: 0.00785
+
+
+trn:Ep0027|| Loss: 0.00797
+
+
+val:Ep0028|| Loss: 0.00783
+
+
+trn:Ep0028|| Loss: 0.00791
+
+
+val:Ep0029|| Loss: 0.00779
+
+
+trn:Ep0029|| Loss: 0.00781
+
+
+val:Ep0030|| Loss: 0.00780
+
+
+trn:Ep0030|| Loss: 0.00781
+
+
+val:Ep0031|| Loss: 0.00761
+
+
+trn:Ep0031|| Loss: 0.00783
+
+
+val:Ep0032|| Loss: 0.00758
+
+
+trn:Ep0032|| Loss: 0.00767
+
+
+val:Ep0033|| Loss: 0.00744
+
+
+trn:Ep0033|| Loss: 0.00760
+
+
+val:Ep0034|| Loss: 0.00740
+
+
+trn:Ep0034|| Loss: 0.00760
+
+
+val:Ep0035|| Loss: 0.00735
+
+
+trn:Ep0035|| Loss: 0.00751
+
+
+val:Ep0036|| Loss: 0.00749
+
+
+trn:Ep0036|| Loss: 0.00750
+
+
+val:Ep0037|| Loss: 0.00733
+
+
+trn:Ep0037|| Loss: 0.00749
+
+
+val:Ep0038|| Loss: 0.00742
+
+
+trn:Ep0038|| Loss: 0.00742
+
+
+val:Ep0039|| Loss: 0.00728
+
+
+trn:Ep0039|| Loss: 0.00744
+
+
+val:Ep0040|| Loss: 0.00742
+
+
+trn:Ep0040|| Loss: 0.00733
+
+
+val:Ep0041|| Loss: 0.00735
+
+
+trn:Ep0041|| Loss: 0.00731
+
+
+val:Ep0042|| Loss: 0.00723
+
+
+trn:Ep0042|| Loss: 0.00739
+
+
+val:Ep0043|| Loss: 0.00715
+
+
+trn:Ep0043|| Loss: 0.00726
+
+
+val:Ep0044|| Loss: 0.00718
+
+
+trn:Ep0044|| Loss: 0.00713
+
+
+val:Ep0045|| Loss: 0.00716
+
+
+trn:Ep0045|| Loss: 0.00721
+
+
+val:Ep0046|| Loss: 0.00698
+
+
+trn:Ep0046|| Loss: 0.00714
+
+
+val:Ep0047|| Loss: 0.00700
+
+
+trn:Ep0047|| Loss: 0.00715
+
+
+val:Ep0048|| Loss: 0.00707
+
+
+trn:Ep0048|| Loss: 0.00710
+
+
+val:Ep0049|| Loss: 0.00708
+
+
+trn:Ep0049|| Loss: 0.00705
+
+
+val:Ep0050|| Loss: 0.00718
+
+
+trn:Ep0050|| Loss: 0.00703
+
+
+val:Ep0051|| Loss: 0.00687
+
+
+trn:Ep0051|| Loss: 0.00701
+
+
+val:Ep0052|| Loss: 0.00684
+
+
+trn:Ep0052|| Loss: 0.00697
+
+
+val:Ep0053|| Loss: 0.00713
+
+
+trn:Ep0053|| Loss: 0.00697
+
+
+val:Ep0054|| Loss: 0.00682
+
+
+trn:Ep0054|| Loss: 0.00699
+
+
+val:Ep0055|| Loss: 0.00696
+
+
+trn:Ep0055|| Loss: 0.00701
+
+
+val:Ep0056|| Loss: 0.00690
+
+
+trn:Ep0056|| Loss: 0.00687
+
+
+val:Ep0057|| Loss: 0.00661
+
+
+trn:Ep0057|| Loss: 0.00690
+
+
+val:Ep0058|| Loss: 0.00678
+
+
+trn:Ep0058|| Loss: 0.00692
+
+
+val:Ep0059|| Loss: 0.00668
+
+
+trn:Ep0059|| Loss: 0.00680
+
+
+val:Ep0060|| Loss: 0.00673
+
+
+trn:Ep0060|| Loss: 0.00683
+
+
+val:Ep0061|| Loss: 0.00676
+
+
+trn:Ep0061|| Loss: 0.00677
+
+
+val:Ep0062|| Loss: 0.00659
+
+
+trn:Ep0062|| Loss: 0.00674
+
+
+val:Ep0063|| Loss: 0.00661
+
+
+trn:Ep0063|| Loss: 0.00677
+
+
+val:Ep0064|| Loss: 0.00653
+
+
+trn:Ep0064|| Loss: 0.00667
+
+
+val:Ep0065|| Loss: 0.00666
+
+
+trn:Ep0065|| Loss: 0.00675
+
+
+val:Ep0066|| Loss: 0.00656
+
+Epoch    68: reducing learning rate of group 0 to 1.0000e-04.
+
+trn:Ep0066|| Loss: 0.00666
+
+
+val:Ep0067|| Loss: 0.00629
+
+
+trn:Ep0067|| Loss: 0.00645
+
+
+val:Ep0068|| Loss: 0.00627
+
+
+trn:Ep0068|| Loss: 0.00640
+
+
+val:Ep0069|| Loss: 0.00632
+
+
+trn:Ep0069|| Loss: 0.00633
+
+
+val:Ep0070|| Loss: 0.00616
+
+
+trn:Ep0070|| Loss: 0.00629
+
+
+val:Ep0071|| Loss: 0.00632
+
+
+trn:Ep0071|| Loss: 0.00632
+
+
+val:Ep0072|| Loss: 0.00625
+
+
+trn:Ep0072|| Loss: 0.00624
+
+
+val:Ep0073|| Loss: 0.00619
+
+
+trn:Ep0073|| Loss: 0.00630
+
+
+val:Ep0074|| Loss: 0.00626
+
+
+trn:Ep0074|| Loss: 0.00628
+
+
+val:Ep0075|| Loss: 0.00605
+
+
+trn:Ep0075|| Loss: 0.00626
+
+
+val:Ep0076|| Loss: 0.00613
+
+
+trn:Ep0076|| Loss: 0.00633
+
+
+val:Ep0077|| Loss: 0.00634
+
+
+trn:Ep0077|| Loss: 0.00623
+
+
+val:Ep0078|| Loss: 0.00614
+
+
+trn:Ep0078|| Loss: 0.00623
+
+
+val:Ep0079|| Loss: 0.00604
+
+
+trn:Ep0079|| Loss: 0.00629
+
+
+val:Ep0080|| Loss: 0.00611
+
+
+trn:Ep0080|| Loss: 0.00623
+
+
+val:Ep0081|| Loss: 0.00617
+
+
+trn:Ep0081|| Loss: 0.00624
+
+
+val:Ep0082|| Loss: 0.00621
+
+
+trn:Ep0082|| Loss: 0.00626
+
+
+val:Ep0083|| Loss: 0.00611
+
+
+trn:Ep0083|| Loss: 0.00628
+
+
+val:Ep0084|| Loss: 0.00618
+
+Epoch    86: reducing learning rate of group 0 to 1.0000e-05.
+
+trn:Ep0084|| Loss: 0.00622
+
+
+val:Ep0085|| Loss: 0.00631
+
+
+trn:Ep0085|| Loss: 0.00623
+
+
+val:Ep0086|| Loss: 0.00617
+
+
+trn:Ep0086|| Loss: 0.00618
+
+
+val:Ep0087|| Loss: 0.00618
+
+
+trn:Ep0087|| Loss: 0.00623
+
+
+val:Ep0088|| Loss: 0.00609
+
+
+trn:Ep0088|| Loss: 0.00617
+
+
+val:Ep0089|| Loss: 0.00613
+
+
+trn:Ep0089|| Loss: 0.00615
+
+
+val:Ep0090|| Loss: 0.00611
+
+
+trn:Ep0090|| Loss: 0.00618
+
+
+val:Ep0091|| Loss: 0.00607
+
+
+trn:Ep0091|| Loss: 0.00621
+
+
+val:Ep0092|| Loss: 0.00614
+
+
+trn:Ep0092|| Loss: 0.00617
+
+
+val:Ep0093|| Loss: 0.00614
+
+Epoch    95: reducing learning rate of group 0 to 1.0000e-06.
+
+trn:Ep0093|| Loss: 0.00620
+
+
+val:Ep0094|| Loss: 0.00619
+
+
+trn:Ep0094|| Loss: 0.00614
+
+
+val:Ep0095|| Loss: 0.00615
+
+
+trn:Ep0095|| Loss: 0.00618
+
+
+val:Ep0096|| Loss: 0.00616
+
+
+trn:Ep0096|| Loss: 0.00622
+
+
+val:Ep0097|| Loss: 0.00618
+
+
+trn:Ep0097|| Loss: 0.00618
+
+
+val:Ep0098|| Loss: 0.00618
+
+
+trn:Ep0098|| Loss: 0.00623
+
+
+val:Ep0099|| Loss: 0.00606
+

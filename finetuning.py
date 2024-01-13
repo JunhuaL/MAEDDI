@@ -55,9 +55,10 @@ if __name__ == '__main__':
     num_out_dim = args.num_out_dim
     split_strat = args.split_strategy
     model_type = args.model_type
-    gconv_ckpt = args.gconv_ckpt
-    cnn_ckpt = args.cnn_ckpt
+    gconv_ckpt = args.__dict__.get('gconv_ckpt')
+    cnn_ckpt = args.__dict__.get('cnn_ckpt')
     lin_Eval = args.lin_eval
+    n_layers = args.n_layers
 
     y_transfrom_func = None
 
@@ -101,17 +102,19 @@ if __name__ == '__main__':
                             task_type = task_type,category=category,
                             scheduler_ReduceLROnPlateau_tracking=scheduler_ReduceLROnPlateau_tracking,
                             num_out_dim = num_out_dim, model_type=model_type,
+                            n_layers = n_layers
                             )
 
-    empty_rgcn = PreModel_Container(119,128,22,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
-    empty_rgcn.load_from_checkpoint(gconv_ckpt)
-    model.model.gconv1.load_state_dict(empty_rgcn.model.encoder.state_dict())
-    model.model.gconv2.load_state_dict(empty_rgcn.model.encoder.state_dict())
+    if gconv_ckpt and cnn_ckpt:
+        empty_rgcn = PreModel_Container(119,128,n_layers,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
+        empty_rgcn.load_from_checkpoint(gconv_ckpt)
+        model.model.gconv1.load_state_dict(empty_rgcn.model.encoder.state_dict())
+        model.model.gconv2.load_state_dict(empty_rgcn.model.encoder.state_dict())
 
-    empty_conv = SMILEMAE(67,128)
-    empty_conv.load_from_checkpoint(cnn_ckpt)
-    model.model.gconv1_seq.conv.load_state_dict(empty_conv.model.encoder.conv.state_dict())
-    model.model.gconv2_seq.conv.load_state_dict(empty_conv.model.encoder.conv.state_dict())
+        empty_conv = SMILEMAE(67,128)
+        empty_conv.load_from_checkpoint(cnn_ckpt)
+        model.model.gconv1_seq.conv.load_state_dict(empty_conv.model.encoder.conv.state_dict())
+        model.model.gconv2_seq.conv.load_state_dict(empty_conv.model.encoder.conv.state_dict())
 
     if lin_Eval:
         for param in model.model.gconv1.parameters():
@@ -136,10 +139,10 @@ if __name__ == '__main__':
                                         mode = earlystopping_mode,
                                         monitor=earlystopping_tracking,
                                         save_top_k=1,save_last=True,)
-    # earlystop_callback = pl_callbacks.EarlyStopping(earlystopping_tracking,verbose=True,
-    #                                     mode = earlystopping_mode,
-    #                                     min_delta=earlystopping_min_delta,
-    #                                     patience=10,)
+    earlystop_callback = pl_callbacks.EarlyStopping(earlystopping_tracking,verbose=True,
+                                        mode = earlystopping_mode,
+                                        min_delta=earlystopping_min_delta,
+                                        patience=10,)
     
     trainer = Trainer(
                     gpus=[gpus,],
@@ -148,8 +151,8 @@ if __name__ == '__main__':
                     default_root_dir= save_folder,
                     fast_dev_run=False,
                     check_val_every_n_epoch=1,
-                    callbacks=  [checkpoint_callback,]
-                                # earlystop_callback,],
+                    callbacks=  [checkpoint_callback,
+                                earlystop_callback,],
                     )
     trainer.fit(model, datamodule=datamodule,)
 
