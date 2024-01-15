@@ -160,9 +160,9 @@ class EntryDataset(InMemoryDataset):
         mols_list= list(map(Chem.MolFromSmiles, drug_df.SMILES))  # some SMILES maybe are failed to parse
         featurizer = user_MolGraphConvFeaturizer(use_edges=True,use_chirality=True,use_partial_charge=True)
         deepchem_list = featurizer.featurize(mols_list)
-        
+        print("featurize complete")
         data_list = []      
-        for convMol in tqdm(deepchem_list) :
+        for convMol in tqdm(deepchem_list):
             #print(convMol)
             if isinstance(convMol,np.ndarray) :
                 feat_mat=np.zeros((default_dim_nodes,default_dim_features))
@@ -186,9 +186,10 @@ class EntryDataset(InMemoryDataset):
                                 edge_index=t.from_numpy(edges).long(),
                                 edge_attr=t.from_numpy(edges_attr).float()))
         
-        
+        print("reformat complete")
         data,slices = self.collate(data_list)
-        t.save((data,slices,self.entryIDs), self.processed_paths[0])  
+        t.save((data,slices,self.entryIDs), self.processed_paths[0]) 
+        print("written to disk")
         self.data, self.slices,self.entryIDs = t.load(self.processed_paths[0])
 
     def edge_process(self, 
