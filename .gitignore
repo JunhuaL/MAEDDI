@@ -1,6 +1,6 @@
 *.pt
 *.ipynb
 *.ckpt
-./dataset/Chemberta/*
+./dataset/Chemberta/**
 ./model_checkpoints/*
 ./output/*
