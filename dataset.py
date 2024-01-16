@@ -655,21 +655,27 @@ class MolDataset(t.utils.data.Dataset):
         return self.num_samples
     
 class Pretraining_Dataset(LightningDataModule):
-    def __init__(self,data_folder,batch_size=128,task_type='pretrain',split_strat='random'):
+    def __init__(self,data_folder,batch_size=128,task_type='pretrain',split_strat='random',partition='data',nrows=100000):
         super().__init__()
         self.data_folder = data_folder
         self.batch_size = batch_size
         self.task_type = task_type
         self.split_strat = split_strat
+        self.partition = partition
+        self.nrows = nrows
     
     def prepare_data(self):
         pass
 
     def my_prepare_data(self):
-        self.dataset = EntryDataset(self.data_folder)    
+        self.dataset = EntryDataset(self.data_folder,filename=self.partition)    
         self.dataset.add_node_degree()
         
-        self.data_split = evaluation.Split_Strats(None,self.data_folder+'cleaned_data.csv',clustering='cluster' in self.split_strat)
+        partition_base = int(self.partition[6:]) * 100000 if self.partition != 'data' else None
+        self.data_split = evaluation.Split_Strats(None,self.data_folder+'drug.csv',
+                                                  clustering='cluster' in self.split_strat,
+                                                  partition_base= partition_base,
+                                                  nrows=self.nrows)
         #generate train test split indices
         if self.split_strat == 'random':
             num_samples = len(self.dataset)

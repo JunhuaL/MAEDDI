@@ -6,12 +6,17 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 class Split_Strats:
-    def __init__(self,entry_data_file,drug_data_file,clustering=False):
+    def __init__(self,entry_data_file,drug_data_file,clustering=False, partition_base = None, nrows = 100000):
         if entry_data_file:
             self.entry_data = pd.read_csv(entry_data_file)
         else:
             self.entry_data = None
-        self.drug_data = pd.read_csv(drug_data_file)
+
+        if partition_base:
+            self.drug_data = pd.read_csv(drug_data_file,header=None,skiprows=partition_base,nrows=nrows)
+        else:
+            self.drug_data = pd.read_csv(drug_data_file)
+            
         if clustering:
             mols = np.array(list(map(Chem.MolFromSmiles,self.drug_data['SMILES'])))
             fps = [AllChem.GetMorganFingerprintAsBitVect(mol,2) for mol in mols if mol!=None]
