@@ -1,0 +1,5 @@
+python finetuning.py --configfile=./configs/AEconfigs/8_layers.all_cluster.yml
+python finetuning.py --configfile=./configs/AEconfigs/2_layers.all_cluster.yml
+python finetuning.py --configfile=./configs/AEconfigs/16_layer.all_cluster.yml
+python finetuning.py --configfile=./configs/AEconfigs/4_layer.all_cluster.yml
+python finetuning.py --configfile=./configs/AEconfigs/1_layers.all_cluster.yml

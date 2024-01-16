@@ -153,6 +153,7 @@ if __name__ == '__main__':
                     check_val_every_n_epoch=1,
                     callbacks=  [checkpoint_callback,
                                 earlystop_callback,],
+                    enable_progress_bar=False,
                     )
     trainer.fit(model, datamodule=datamodule,)
 

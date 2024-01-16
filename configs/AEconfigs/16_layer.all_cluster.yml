@@ -9,7 +9,7 @@ pair_file: ./dataset/DrugBank/binary_1vs1/entry_pairs.csv
 label_file: ./dataset/DrugBank/binary_1vs1/pair_labels.csv
 save_folder: ./output/DrugBank/binary_1vs1/all_cluster/
 split_strategy: sample_from_all_clusters
-gconv_ckpt: ./model_checkpoints/epoch_80_layers_16_all_cls/last.ckpt
+gconv_ckpt: ./model_checkpoints/epoch_100_layers_16_all_cls/last.ckpt
 cnn_ckpt: ./model_checkpoints/cnn_max_epoch_80_all_cls/last.ckpt
 lin_eval: False
 model_type: deepdrug
