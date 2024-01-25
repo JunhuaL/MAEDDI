@@ -1,0 +1,11 @@
+drop_edge_rate: 0.6
+in_dim: 119
+in_edge_channel: 11
+lr: 0.001
+mask_rate: 0.6
+mid_edge_channel: 128
+my_logging: false
+num_hidden: 128
+num_layers: 4
+scheduler_ReduceLROnPlateau_tracking: ntxent
+verbose: true

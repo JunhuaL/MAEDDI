@@ -10,7 +10,7 @@ from torch import Tensor
 from pytorch_lightning import callbacks as pl_callbacks
 from pytorch_lightning import Trainer
 
-from PreModel import SMILEMAE 
+from MolMAE import SMILEMAE 
 from dataset import SMILES_DataModule
 from utils import * 
 

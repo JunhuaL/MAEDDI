@@ -10,7 +10,7 @@ import torch as t
 from torch import Tensor
 from pytorch_lightning import callbacks as pl_callbacks
 from pytorch_lightning import Trainer
-from PreModel import PreModel_Container, SMILEMAE
+from MolMAE import PreModel_Container, SMILEMAE
 from LinEvalModel import DeepDrug_Container
 from dataset import DeepDrug_Dataset
 from utils import * 

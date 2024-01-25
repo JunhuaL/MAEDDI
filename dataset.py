@@ -157,7 +157,8 @@ class EntryDataset(InMemoryDataset):
         assert np.all(np.in1d(['drugID','SMILES'] , drug_df.columns.values))
         self.entryIDs = drug_df.drugID.values
         
-        mols_list= list(map(Chem.MolFromSmiles, drug_df.SMILES))  # some SMILES maybe are failed to parse
+        mols_list = list(map(Chem.MolFromSmiles, drug_df.SMILES))  # some SMILES maybe are failed to parse
+        mols_list = [mol for mol in mols_list if mol] 
         featurizer = user_MolGraphConvFeaturizer(use_edges=True,use_chirality=True,use_partial_charge=True)
         deepchem_list = featurizer.featurize(mols_list)
         print("featurize complete")
@@ -191,6 +192,81 @@ class EntryDataset(InMemoryDataset):
         t.save((data,slices,self.entryIDs), self.processed_paths[0]) 
         print("written to disk")
         self.data, self.slices,self.entryIDs = t.load(self.processed_paths[0])
+
+    def large_drug_process(self,
+                          drug_df_dir, flag_add_self_loops=False,
+                          default_dim_features=119,default_dim_nodes=50,use_edges=True):
+        import deepchem as dc
+        from rdkit import Chem
+        from tqdm import tqdm
+        import subprocess
+        import gc
+        
+        working_base = 1
+        nrows = 10000 
+
+        csv_no_lines = int(subprocess.check_output(f"wc -l {drug_df_dir}", shell=True).split()[0]) - 1
+
+        full_partitions = csv_no_lines // nrows
+        remainder_partition = 0 if (csv_no_lines % nrows) == 0 else 1
+        total_partitions = full_partitions + remainder_partition
+        
+        featurizer = user_MolGraphConvFeaturizer(use_edges=True,use_chirality=True,use_partial_charge=True)
+        print("Initialization complete")
+        for p in range(total_partitions):
+            print(f"Starting featurization of partition {p}")
+            working_df = pd.read_csv(drug_df_dir,skiprows=working_base,nrows=nrows,header=None)
+            working_df.columns = ['drugID','SMILES']
+            print(f"Loaded csv from lines {working_base} to {working_base+nrows}")
+            mols_list = list(map(Chem.MolFromSmiles,working_df.SMILES))
+            none_inds = [i for i,val in enumerate(mols_list) if val == None]
+            mols_list = [mol for mol in mols_list if mol]
+            working_mols_ids = working_df.drugID.values
+            working_mols_ids = np.delete(working_mols_ids,none_inds)
+            print(f"Converted SMILES strings to Mol")
+            chemslist = featurizer.featurize(mols_list,log_every_n=50)
+            print("Featurizing SMILES strings.")
+            data_list = []
+            for convMol in tqdm(chemslist):
+                if isinstance(convMol,np.ndarray) :
+                    feat_mat=np.zeros((default_dim_nodes,default_dim_features))
+                    num_nodes = feat_mat.shape[0]
+                    edges = np.array([[],[]])
+                    edges_attr = np.array([])
+                
+                
+                else:
+                    feat_mat = convMol.node_features#.atom_features
+                    num_nodes = feat_mat.shape[0]
+                    edges_attr = convMol.edge_features
+                    edges = convMol.edge_index
+                    
+                    
+                if flag_add_self_loops:
+                    edges = add_self_loops(edges,num_nodes=num_nodes)[0]
+                    
+                
+                data_list.append(Data(x=t.from_numpy(feat_mat).float(),
+                                    edge_index=t.from_numpy(edges).long(),
+                                    edge_attr=t.from_numpy(edges_attr).float()))
+            
+            data,slices = self.collate(data_list)
+            partition_path = self.processed_paths[0].split('.')
+            partition_path[-2] = partition_path[-2] + f'_{p}'
+            partition_path = '.'.join(partition_path)
+            t.save((data,slices,working_mols_ids),partition_path)
+            del data
+            del slices
+            del mols_list
+            del working_df
+            del working_mols_ids
+            del chemslist
+            del data_list
+            gc.collect()
+            working_base += nrows
+        
+        
+
 
     def edge_process(self, 
                     drug_df,flag_add_self_loops=False,
@@ -703,21 +779,21 @@ class Pretraining_Dataset(LightningDataModule):
         print('in train dataloader...')
         train_ids = self.dataset.entryIDs[self.train_indxs]
         train_split = MolDataset(self.dataset,train_ids)
-        dataloader = DataLoader(train_split,num_workers=0,shuffle=True,batch_size=64,pin_memory=True)
+        dataloader = DataLoader(train_split,num_workers=0,shuffle=True,batch_size=self.batch_size,pin_memory=True,drop_last=True)
         return dataloader
     
     def val_dataloader(self):
         print('in val dataloader...')
         valid_ids = self.dataset.entryIDs[self.valid_indxs]
         valid_split = MolDataset(self.dataset,valid_ids)
-        dataloader = DataLoader(valid_split,num_workers=0,shuffle=False,batch_size=64)
+        dataloader = DataLoader(valid_split,num_workers=0,shuffle=False,batch_size=self.batch_size,drop_last=True)
         return dataloader
     
     def test_dataloader(self):
         print('in test dataloader...')
         test_ids = self.dataset.entryIDs[self.test_indxs]
         test_split = MolDataset(self.dataset,test_ids)
-        dataloader = DataLoader(test_split,num_workers=0,shuffle=False,batch_size=64)
+        dataloader = DataLoader(test_split,num_workers=0,shuffle=False,batch_size=self.batch_size,drop_last=True)
         return dataloader
     
 class SMILES_DataModule(LightningDataModule):

@@ -244,11 +244,11 @@ class PreModel_Container(LightningModule):
                 nhead_out: int,
                 in_edge_channel: int=11,
                 mid_edge_channel: int=128,
-                mask_rate: float = 0.3,
+                mask_rate: float = 0.6,
                 encoder_type: str = "gat",
                 decoder_type: str = "gat",
                 loss_fn: str = "mse",
-                drop_edge_rate: float = 0.0,
+                drop_edge_rate: float = 0.6,
                 replace_rate: float = 0.1,
                 alpha_l: float = 2,
                 lr: float = 0.001, 
@@ -298,7 +298,7 @@ class PreModel_Container(LightningModule):
         return self.model(batch)
     
     def training_step(self,batch,batch_idx):
-        y = batch
+        y = batch.clone()
         y_out = self(batch)
         y_node = y.x
         y_edge = y.edge_attr
@@ -317,7 +317,7 @@ class PreModel_Container(LightningModule):
         return return_dict
     
     def validation_step(self, batch, batch_idx):
-        y = batch
+        y = batch.clone()
         y_out = self(batch)
         y_node = y.x
         y_edge = y.edge_attr
@@ -333,7 +333,7 @@ class PreModel_Container(LightningModule):
         return return_dict
     
     def test_step(self, batch, batch_idx):
-        y = batch
+        y = batch.clone()
         y_out = self(batch)
         y_node = y.x
         y_edge = y.edge_attr

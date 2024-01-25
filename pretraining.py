@@ -11,7 +11,7 @@ from torch import Tensor
 from pytorch_lightning import callbacks as pl_callbacks
 from pytorch_lightning import Trainer
 
-from PreModel import PreModel_Container 
+from MolMAE import PreModel_Container 
 from dataset import Pretraining_Dataset
 from utils import * 
 
