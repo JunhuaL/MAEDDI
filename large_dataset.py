@@ -89,11 +89,11 @@ class Large_PretrainingDataset(LightningDataModule):
     def train_dataloader(self):
         train_ids = self.dataset[self.train_indxs]
         train_split = Large_MolDataset(self.data_folder,train_ids)
-        dataloader = DataLoader(train_split,num_workers=2,shuffle=True,batch_size=self.batch_size,pin_memory=True,drop_last=True)
+        dataloader = DataLoader(train_split,num_workers=4,shuffle=True,batch_size=self.batch_size,pin_memory=True,drop_last=True)
         return dataloader
 
     def val_dataloader(self):
         valid_ids = self.dataset[self.valid_indxs]
         valid_split = Large_MolDataset(self.data_folder,valid_ids)
-        dataloader = DataLoader(valid_split,num_workers=2,shuffle=False,batch_size=self.batch_size,pin_memory=True,drop_last=True)
+        dataloader = DataLoader(valid_split,num_workers=4,shuffle=False,batch_size=self.batch_size,pin_memory=True,drop_last=True)
         return dataloader  

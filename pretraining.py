@@ -21,7 +21,7 @@ if __name__ == '__main__':
     n_epochs = int(sys.argv[1])
     n_layers = int(sys.argv[2])
     split_strat = str(sys.argv[3])
-    save_folder = './dataset/DrugBank_pretraining/drug/processed/'
+    save_folder = './dataset/Chemberta/drug/processed/'
     datamodule = Large_PretrainingDataset(save_folder)
 
     model = PreModel_Container(119,128,n_layers,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     earlystopping_mode = 'min'
     earlystopping_min_delta = 0.0001
 
-    save_model_folder = f'./model_checkpoints/epoch_{n_epochs}_layers_{n_layers}_all_cls/'
+    save_model_folder = f'./model_checkpoints/epoch_{n_epochs}_layers_{n_layers}_{split_strat}/'
 
     checkpoint_callback = pl_callbacks.ModelCheckpoint(dirpath=save_model_folder,
                                         mode = earlystopping_mode,
