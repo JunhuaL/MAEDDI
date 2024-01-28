@@ -6,16 +6,13 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 class Split_Strats:
-    def __init__(self,entry_data_file,drug_data_file,clustering=False, partition_base = None, nrows = 100000):
+    def __init__(self,entry_data_file,drug_data_file,clustering=False):
         if entry_data_file:
             self.entry_data = pd.read_csv(entry_data_file)
         else:
             self.entry_data = None
 
-        if partition_base:
-            self.drug_data = pd.read_csv(drug_data_file,header=None,skiprows=partition_base,nrows=nrows)
-        else:
-            self.drug_data = pd.read_csv(drug_data_file)
+        self.drug_data = pd.read_csv(drug_data_file)
             
         if clustering:
             mols = np.array(list(map(Chem.MolFromSmiles,self.drug_data['SMILES'])))

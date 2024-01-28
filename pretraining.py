@@ -13,6 +13,7 @@ from pytorch_lightning import Trainer
 
 from MolMAE import PreModel_Container 
 from dataset import Pretraining_Dataset
+from large_dataset import Large_PretrainingDataset
 from utils import * 
 
 
@@ -20,8 +21,8 @@ if __name__ == '__main__':
     n_epochs = int(sys.argv[1])
     n_layers = int(sys.argv[2])
     split_strat = str(sys.argv[3])
-    save_folder = './dataset/DrugBank_pretraining/drug/'
-    datamodule = Pretraining_Dataset(save_folder,split_strat='sample_from_all_clusters')
+    save_folder = './dataset/DrugBank_pretraining/drug/processed/'
+    datamodule = Large_PretrainingDataset(save_folder)
 
     model = PreModel_Container(119,128,n_layers,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
 
@@ -49,6 +50,6 @@ if __name__ == '__main__':
                     check_val_every_n_epoch=1,
                     callbacks=[checkpoint_callback,]
                         #     earlystop_callback,],
-                    ,enable_progress_bar=False
+                    ,enable_progress_bar=True
                     )
     trainer.fit(model, datamodule=datamodule,)

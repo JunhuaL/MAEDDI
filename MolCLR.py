@@ -99,6 +99,7 @@ class PreModel_Container(LightningModule):
                 in_dim: int,
                 num_hidden: int,
                 num_layers: int,
+                batch_size: int=128,
                 in_edge_channel: int=11,
                 mid_edge_channel: int=128,
                 mask_rate: float = 0.6,
@@ -117,6 +118,7 @@ class PreModel_Container(LightningModule):
         self.lr = lr
 
         self.num_layers = num_layers
+        self.batch_size = batch_size
         self.in_dim = in_dim + 2
         self.enc_mid_channel = num_hidden
         self.in_edge_dim = in_edge_channel
@@ -124,7 +126,7 @@ class PreModel_Container(LightningModule):
         self.mask_rate = mask_rate
         self.drop_edge_rate = drop_edge_rate
         
-        self.loss_func = NTXentLoss(0,128,0.1,True)
+        self.loss_func = NTXentLoss(0,self.batch_size,0.1,True)
 
         self.model = PreModel(self.in_dim,self.enc_mid_channel,self.num_layers,
                               self.enc_mid_channel,self.in_edge_dim,self.enc_mid_edge_channel,
