@@ -147,7 +147,7 @@ class PreModel_Container(LightningModule):
         lr = iter(self.my_optimizers.param_groups).__next__()['lr']
         self.log('lr', np.round(lr,6), prog_bar=True, on_step=True, on_epoch=False)
 
-        return_dict = {'loss':loss, 'zis':t2np(zis), 'zjs':t2np(zjs)}
+        return_dict = {'loss':loss}
         return return_dict
     
     def validation_step(self,batch,batch_idx):
@@ -156,7 +156,7 @@ class PreModel_Container(LightningModule):
 
         self.log('val_loss',loss,prog_bar=True, on_step=False, on_epoch=True,sync_dist=True)
         
-        return_dict = {'loss':t2np(loss), 'zis':t2np(zis), 'zjs':t2np(zjs)}
+        return_dict = {'loss':t2np(loss)}
         return return_dict
     
     def test_step(self,batch,batch_idx):
@@ -165,7 +165,7 @@ class PreModel_Container(LightningModule):
 
         self.log('tst_loss',loss,prog_bar=True, on_step=False, on_epoch=True,sync_dist=True)
         
-        return_dict = {'loss':t2np(loss), 'zis':t2np(zis), 'zjs':t2np(zjs)}
+        return_dict = {'loss':t2np(loss)}
         return return_dict
     
     def training_epoch_end(self, outputs):
