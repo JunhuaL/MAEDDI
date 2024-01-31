@@ -302,7 +302,6 @@ class PreModel_Container(LightningModule):
         y_out = self(batch)
         y_node = y.x
         y_edge = y.edge_attr
-        y_out_node, y_out_edge = y_out
 
         loss = self.loss_func(y_out,(y_node,y_edge))
 
@@ -312,8 +311,7 @@ class PreModel_Container(LightningModule):
         self.log('lr', np.round(lr,6), prog_bar=True, on_step=True,
                  on_epoch=False)
         
-        return_dict = {'loss':loss,'y_node':t2np(y_node),'y_edge':t2np(y_edge),
-                       'y_out_node':t2np(y_out_node),'y_out_edge':t2np(y_out_edge)}
+        return_dict = {'loss':t2np(loss)}
         return return_dict
     
     def validation_step(self, batch, batch_idx):
@@ -321,14 +319,12 @@ class PreModel_Container(LightningModule):
         y_out = self(batch)
         y_node = y.x
         y_edge = y.edge_attr
-        y_out_node, y_out_edge = y_out
 
         loss = self.loss_func(y_out,(y_node,y_edge))
 
         self.log('val_loss', loss, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True)
 
-        return_dict = {'y_node':t2np(y_node),'y_edge':t2np(y_edge),
-                       'y_out_node':t2np(y_out_node),'y_out_edge':t2np(y_out_edge)}
+        return_dict = {'loss':t2np(loss)}
         
         return return_dict
     
@@ -337,25 +333,22 @@ class PreModel_Container(LightningModule):
         y_out = self(batch)
         y_node = y.x
         y_edge = y.edge_attr
-        y_out_node, y_out_edge = y_out
 
         loss = self.loss_func(y_out,(y_node,y_edge))
 
         self.log('test_loss', loss, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True)
 
-        return_dict = {'y_node':t2np(y_node),'y_edge':t2np(y_edge),
-                       'y_out_node':t2np(y_out_node),'y_out_edge':t2np(y_out_edge)}
+        return_dict = {'loss':t2np(loss)}
         
         return return_dict
 
-    def training_epoch_end(self, outputs):
-        y_out_nodes = np.concatenate([x['y_out_node'] for x in outputs])
-        y_out_edges = np.concatenate([x['y_out_edge'] for x in outputs])
-        y_nodes = np.concatenate([x['y_node'] for x in outputs])
-        y_edges = np.concatenate([x['y_edge'] for x in outputs])
-        y_out = (y_out_nodes,y_out_edges)
-        y = (y_nodes,y_edges)
-        metric_dict = self.cal_metrics_on_epoch_end(y,y_out,'trn')
+    def training_epoch_end(self, outputs):        
+        loss = np.concatenate([x['loss'] for x in outputs])
+
+        metric_dict = dict()
+        metric_dict['prefix'] = 'trn'
+        metric_dict['epoch'] = self.current_epoch
+        metric_dict['mse'] = loss.mean()
 
         if self.my_logging:
             self.logger.log_metrics(keep_scalar_func(metric_dict,prefix='epoch_trn'))
@@ -365,13 +358,18 @@ class PreModel_Container(LightningModule):
         self.epoch_metrics.train.append(metric_dict)
 
     def validation_epoch_end(self, outputs):
-        y_out_nodes = np.concatenate([x['y_out_node'] for x in outputs])
-        y_out_edges = np.concatenate([x['y_out_edge'] for x in outputs])
-        y_nodes = np.concatenate([x['y_node'] for x in outputs])
-        y_edges = np.concatenate([x['y_edge'] for x in outputs])
-        y_out = (y_out_nodes,y_out_edges)
-        y = (y_nodes,y_edges)
-        metric_dict = self.cal_metrics_on_epoch_end(y,y_out,'val')
+        losses = [x['loss'] for x in outputs]
+        
+        if losses[0].shape:
+            loss = np.concatenate(losses)
+        else:
+            loss = np.asarray(losses)
+
+        metric_dict = dict()
+        metric_dict['prefix'] = 'val'
+        metric_dict['epoch'] = self.current_epoch
+        metric_dict['mse'] = loss.mean()
+
         self.log('val_epoch_MSE', metric_dict['mse'], prog_bar=False, on_step=False, on_epoch=True)
 
         try: self.epoch_metrics.valid.pop(-1)
@@ -387,13 +385,12 @@ class PreModel_Container(LightningModule):
         self.my_schedulers.step(metric_dict[self.scheduler_ReduceLROnPlateau_tracking])
 
     def test_epoch_end(self, outputs):
-        y_out_nodes = np.concatenate([x['y_out_node'] for x in outputs])
-        y_out_edges = np.concatenate([x['y_out_edge'] for x in outputs])
-        y_nodes = np.concatenate([x['y_node'] for x in outputs])
-        y_edges = np.concatenate([x['y_edge'] for x in outputs])
-        y_out = (y_out_nodes,y_out_edges)
-        y = (y_nodes,y_edges)
-        metric_dict = self.cal_metrics_on_epoch_end(y,y_out,'tst')
+        loss = np.concatenate([x['loss'] for x in outputs])
+
+        metric_dict = dict()
+        metric_dict['prefix'] = 'tst'
+        metric_dict['epoch'] = self.current_epoch
+        metric_dict['mse'] = loss.mean()
 
         if self.my_logging:
             self.logger.log_metrics(keep_scalar_func(metric_dict,prefix='epoch_tst'))
@@ -411,18 +408,6 @@ class PreModel_Container(LightningModule):
             lr = 0
         
         print('\n%s:Ep%04d|| Loss: %.05f\n'%(metric_dict['prefix'],metric_dict['epoch'],metric_dict['mse']))
-
-    def cal_metrics_on_epoch_end(self,y_true,y_pred,prefix,current_epoch=None):
-        y_node,y_edge = y_true
-        y_out_node,y_out_edge = y_pred
-
-        metric_dict = dict()
-        metric_dict['prefix'] = prefix
-        metric_dict['epoch'] = self.current_epoch if current_epoch is None else current_epoch
-        node_loss = ((y_node - y_out_node)**2).mean()
-        edge_loss = ((y_edge - y_out_edge)**2).mean()
-        metric_dict['mse'] = node_loss+edge_loss
-        return metric_dict
 
     def optimizer_step(self, epoch, batch_idx, optimizer, optimizer_idx,
                    optimizer_closure, on_tpu, using_native_amp, using_lbfgs):
