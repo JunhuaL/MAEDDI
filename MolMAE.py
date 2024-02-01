@@ -311,7 +311,7 @@ class PreModel_Container(LightningModule):
         self.log('lr', np.round(lr,6), prog_bar=True, on_step=True,
                  on_epoch=False)
         
-        return_dict = {'loss':t2np(loss)}
+        return_dict = {'loss':loss}
         return return_dict
     
     def validation_step(self, batch, batch_idx):
@@ -343,7 +343,7 @@ class PreModel_Container(LightningModule):
         return return_dict
 
     def training_epoch_end(self, outputs):        
-        loss = np.concatenate([x['loss'] for x in outputs])
+        loss = np.asarray([t2np(x['loss']) for x in outputs])
 
         metric_dict = dict()
         metric_dict['prefix'] = 'trn'
@@ -385,7 +385,7 @@ class PreModel_Container(LightningModule):
         self.my_schedulers.step(metric_dict[self.scheduler_ReduceLROnPlateau_tracking])
 
     def test_epoch_end(self, outputs):
-        loss = np.concatenate([x['loss'] for x in outputs])
+        loss = np.asarray([x['loss'] for x in outputs])
 
         metric_dict = dict()
         metric_dict['prefix'] = 'tst'
