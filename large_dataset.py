@@ -64,14 +64,6 @@ class Large_MolDataset(t.utils.data.Dataset):
                                                 add_batch=False
                                             )
 
-        # self.all_entry_ids = []
-        # self.partition_bases = [0]
-        # for i in range(len(self.data_paths)):
-        #     _,_,entry_ids = t.load(self.data_paths[i])
-        #     self.all_entry_ids.append(entry_ids)
-        #     self.partition_bases.append(len(entry_ids) + self.partition_bases[i])
-        # self.all_entry_ids = np.concatenate(self.all_entry_ids)
-        # self.split_entry_ids = split_entry_ids if split_entry_ids is not None else self.all_entry_ids
         self.num_samples = len(self.entry_ids)
 
     def __getitem__(self, idx):
@@ -81,25 +73,6 @@ class Large_MolDataset(t.utils.data.Dataset):
                         slice_dict=self.slices,
                         decrement=False)
         return data
-        # idx = np.where(self.all_entry_ids == self.split_entry_ids[idx])[0][0]
-        # for i in range(len(self.partition_bases)-1):
-        #     if idx >= self.partition_bases[i] and idx < self.partition_bases[i+1]:
-        #         partition_b = self.partition_bases[i]
-        #         partition_i = i
-        #         break
-
-        # working_file = self.data_paths[partition_i]
-        # offset = idx - partition_b
-        # data,slices,entry_id = t.load(working_file)
-        # x = separate(
-        #     cls=data.__class__,
-        #     batch=data,
-        #     idx=offset,
-        #     slice_dict=slices,
-        #     decrement=False,
-        # )
-
-        # return graph_add_degree(x)
     
     def __len__(self):
         return self.num_samples
@@ -125,7 +98,7 @@ class Large_PretrainingDataset(LightningDataModule):
         num_samples = len(self.dataset)
         tmp_indxs = np.random.permutation(num_samples)
         self.train_indxs = tmp_indxs[:int(num_samples*0.9)]
-        self.valid_indxs = tmp_indxs[:int(num_samples*0.9):]
+        self.valid_indxs = tmp_indxs[int(num_samples*0.9):]
     
     def setup(self, stage=None):
         self.my_prepare_data()

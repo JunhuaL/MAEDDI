@@ -11,7 +11,7 @@ from torch import Tensor
 from pytorch_lightning import callbacks as pl_callbacks
 from pytorch_lightning import Trainer
 
-from MolMAE import PreModel_Container 
+from MolCLR import PreModel_Container 
 from dataset import Pretraining_Dataset
 from large_dataset import Large_PretrainingDataset
 from utils import * 
@@ -24,13 +24,13 @@ if __name__ == '__main__':
     save_folder = './dataset/Chemberta/drug/processed/'
     datamodule = Large_PretrainingDataset(save_folder)
 
-    model = PreModel_Container(119,128,n_layers,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
+    model = PreModel_Container(119,128,n_layers)
 
     earlystopping_tracking = 'val_loss'
     earlystopping_mode = 'min'
     earlystopping_min_delta = 0.0001
 
-    save_model_folder = f'./model_checkpoints/epoch_{n_epochs}_layers_{n_layers}_{split_strat}/'
+    save_model_folder = f'./model_checkpoints/clr_epoch_{n_epochs}_layers_{n_layers}_{split_strat}/'
 
     checkpoint_callback = pl_callbacks.ModelCheckpoint(dirpath=save_model_folder,
                                         mode = earlystopping_mode,
@@ -50,6 +50,6 @@ if __name__ == '__main__':
                     check_val_every_n_epoch=1,
                     callbacks=[checkpoint_callback,]
                         #     earlystop_callback,],
-                    ,enable_progress_bar=True
+                    ,enable_progress_bar=False
                     )
     trainer.fit(model, datamodule=datamodule,)
