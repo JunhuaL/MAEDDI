@@ -30,7 +30,7 @@ if __name__ == '__main__':
     earlystopping_mode = 'min'
     earlystopping_min_delta = 0.0001
 
-    save_model_folder = f'./model_checkpoints/epoch_{n_epochs}_layers_{n_layers}_{split_strat}/'
+    save_model_folder = f'./model_checkpoints/mae_epoch_{n_epochs}_layers_{n_layers}_{split_strat}/'
 
     checkpoint_callback = pl_callbacks.ModelCheckpoint(dirpath=save_model_folder,
                                         mode = earlystopping_mode,
