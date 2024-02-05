@@ -10,7 +10,7 @@ import torch as t
 from torch import Tensor
 from pytorch_lightning import callbacks as pl_callbacks
 from pytorch_lightning import Trainer
-from MolMAE import PreModel_Container, SMILEMAE
+from MolCLR import PreModel_Container
 from LinEvalModel import DeepDrug_Container
 from dataset import DeepDrug_Dataset
 from utils import * 
@@ -106,24 +106,14 @@ if __name__ == '__main__':
                             )
 
     if gconv_ckpt and cnn_ckpt:
-        empty_rgcn = PreModel_Container(119,128,n_layers,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
+        empty_rgcn = PreModel_Container(119,128,n_layers)
         empty_rgcn.load_from_checkpoint(gconv_ckpt)
         model.model.gconv1.load_state_dict(empty_rgcn.model.encoder.state_dict())
-        model.model.gconv2.load_state_dict(empty_rgcn.model.encoder.state_dict())
-
-        empty_conv = SMILEMAE(67,128)
-        empty_conv.load_from_checkpoint(cnn_ckpt)
-        model.model.gconv1_seq.conv.load_state_dict(empty_conv.model.encoder.conv.state_dict())
-        model.model.gconv2_seq.conv.load_state_dict(empty_conv.model.encoder.conv.state_dict())
 
     if lin_Eval:
         for param in model.model.gconv1.parameters():
             param.requires_grad = False
         for param in model.model.gconv2.parameters():
-            param.requires_grad = False
-        for param in model.model.gconv1_seq.conv.parameters():
-            param.requires_grad = False
-        for param in model.model.gconv2_seq.conv.parameters():
             param.requires_grad = False
 
     if earlystopping_tracking in ['val_loss',]:
@@ -153,7 +143,7 @@ if __name__ == '__main__':
                     check_val_every_n_epoch=1,
                     callbacks=  [checkpoint_callback,
                                 earlystop_callback,],
-                    enable_progress_bar=False,
+                    # enable_progress_bar=False,
                     )
     trainer.fit(model, datamodule=datamodule,)
 
