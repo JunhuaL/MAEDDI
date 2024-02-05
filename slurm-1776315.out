@@ -1,0 +1,272 @@
+Job running on landonia14
+Job started: 02/02/2024 21:20:51
+Setting up bash environment
+Activating conda environment: masters
+drug.csv
+
+sent 182.09M bytes  received 35 bytes  1.85M bytes/sec
+total size is 1.09G  speedup is 6.00
+sending incremental file list
+processed/data_0.pt
+processed/data_1.pt
+processed/data_10.pt
+processed/data_11.pt
+processed/data_12.pt
+processed/data_13.pt
+processed/data_14.pt
+processed/data_15.pt
+processed/data_16.pt
+processed/data_17.pt
+processed/data_18.pt
+processed/data_19.pt
+processed/data_2.pt
+processed/data_20.pt
+processed/data_21.pt
+processed/data_22.pt
+processed/data_23.pt
+processed/data_24.pt
+processed/data_25.pt
+processed/data_26.pt
+processed/data_27.pt
+processed/data_28.pt
+processed/data_29.pt
+processed/data_3.pt
+processed/data_30.pt
+processed/data_31.pt
+processed/data_32.pt
+processed/data_33.pt
+processed/data_34.pt
+processed/data_35.pt
+processed/data_36.pt
+processed/data_37.pt
+processed/data_38.pt
+processed/data_39.pt
+processed/data_4.pt
+processed/data_40.pt
+processed/data_41.pt
+processed/data_42.pt
+processed/data_43.pt
+processed/data_44.pt
+processed/data_45.pt
+processed/data_46.pt
+processed/data_47.pt
+processed/data_48.pt
+processed/data_49.pt
+processed/data_5.pt
+processed/data_6.pt
+processed/data_7.pt
+processed/data_8.pt
+processed/data_9.pt
+
+sent 120.83M bytes  received 967 bytes  1.12M bytes/sec
+total size is 5.57G  speedup is 46.13
+DeepGCN.py
+LinEvalModel.py
+MolCLR.py
+MolMAE.py
+clr_pretraining.py
+cnn_pretraining.py
+conformers.py
+dataset.py
+evaluation.py
+finetuning.py
+large_dataset.py
+lineval.py
+mae_pretraining.py
+metrics.py
+molGraphConvFeaturizer.py
+nt_xent.py
+smiles2graphs.py
+utils.py
+
+sent 39.54K bytes  received 358 bytes  26.60K bytes/sec
+total size is 167.83K  speedup is 4.21
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+
+  | Name      | Type        | Params
+------------------------------------------
+0 | loss_func | My_MSE_Loss | 0     
+1 | model     | PreModel    | 768 K 
+------------------------------------------
+768 K     Trainable params
+0         Non-trainable params
+768 K     Total params
+3.074     Total estimated model params size (MB)
+`Trainer.fit` stopped: `max_epochs=20` reached.
+PreModel(
+  (encoder): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=11, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (decoder): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=128, out_features=121, bias=True)
+      (1): LayerNorm((121,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=128, out_features=11, bias=True)
+      (1): LayerNorm((11,), eps=1e-05, elementwise_affine=True)
+    )
+    (edge_decoder): Linear(in_features=121, out_features=11, bias=True)
+  )
+  (encoder2decoder_nodes): Linear(in_features=128, out_features=128, bias=False)
+  (encoder2decoder_edges): Linear(in_features=128, out_features=128, bias=False)
+)
+
+val:Ep0000|| Loss: 1.20701
+
+
+val:Ep0000|| Loss: 0.03442
+
+
+trn:Ep0000|| Loss: 0.04251
+
+
+val:Ep0001|| Loss: 0.03318
+
+
+trn:Ep0001|| Loss: 0.03378
+
+
+val:Ep0002|| Loss: 0.03272
+
+
+trn:Ep0002|| Loss: 0.03275
+
+
+val:Ep0003|| Loss: 0.03213
+
+
+trn:Ep0003|| Loss: 0.03223
+
+
+val:Ep0004|| Loss: 0.03199
+
+
+trn:Ep0004|| Loss: 0.03192
+
+
+val:Ep0005|| Loss: 0.03172
+
+
+trn:Ep0005|| Loss: 0.03172
+
+
+val:Ep0006|| Loss: 0.03172
+
+
+trn:Ep0006|| Loss: 0.03161
+
+
+val:Ep0007|| Loss: 0.03162
+
+
+trn:Ep0007|| Loss: 0.03152
+
+
+val:Ep0008|| Loss: 0.03145
+
+
+trn:Ep0008|| Loss: 0.03141
+
+
+val:Ep0009|| Loss: 0.03143
+
+
+trn:Ep0009|| Loss: 0.03135
+
+
+val:Ep0010|| Loss: 0.03140
+
+
+trn:Ep0010|| Loss: 0.03132
+
+
+val:Ep0011|| Loss: 0.03153
+
+
+trn:Ep0011|| Loss: 0.03128
+
+
+val:Ep0012|| Loss: 0.03126
+
+
+trn:Ep0012|| Loss: 0.03123
+
+
+val:Ep0013|| Loss: 0.03136
+
+
+trn:Ep0013|| Loss: 0.03119
+
+
+val:Ep0014|| Loss: 0.03123
+
+
+trn:Ep0014|| Loss: 0.03118
+
+
+val:Ep0015|| Loss: 0.03119
+
+
+trn:Ep0015|| Loss: 0.03114
+
+
+val:Ep0016|| Loss: 0.03124
+
+
+trn:Ep0016|| Loss: 0.03113
+
+
+val:Ep0017|| Loss: 0.03117
+
+
+trn:Ep0017|| Loss: 0.03109
+
+
+val:Ep0018|| Loss: 0.03123
+
+
+trn:Ep0018|| Loss: 0.03109
+
+
+val:Ep0019|| Loss: 0.03119
+
+sending incremental file list
+model_checkpoints/mae_epoch_20_layers_4_random/
+model_checkpoints/mae_epoch_20_layers_4_random/epoch=17-step=63270.ckpt
+model_checkpoints/mae_epoch_20_layers_4_random/last.ckpt
+model_checkpoints/mae_epoch_20_layers_4_random/lightning_logs/
+model_checkpoints/mae_epoch_20_layers_4_random/lightning_logs/version_1776315/
+model_checkpoints/mae_epoch_20_layers_4_random/lightning_logs/version_1776315/events.out.tfevents.1706909230.landonia14.inf.ed.ac.uk.366026.0
+model_checkpoints/mae_epoch_20_layers_4_random/lightning_logs/version_1776315/hparams.yaml
+
+sent 17.23M bytes  received 113 bytes  6.89M bytes/sec
+total size is 18.74M  speedup is 1.09
+
+=============
+job finished successfully
+Job finished: 02/02/2024 23:08:24

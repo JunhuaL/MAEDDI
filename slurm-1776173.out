@@ -1,0 +1,273 @@
+Job running on landonia02
+Job started: 01/02/2024 22:20:55
+Setting up bash environment
+Activating conda environment: masters
+drug.csv
+
+sent 182.09M bytes  received 35 bytes  1.87M bytes/sec
+total size is 1.09G  speedup is 6.00
+sending incremental file list
+processed/data_0.pt
+processed/data_1.pt
+processed/data_10.pt
+processed/data_11.pt
+processed/data_12.pt
+processed/data_13.pt
+processed/data_14.pt
+processed/data_15.pt
+processed/data_16.pt
+processed/data_17.pt
+processed/data_18.pt
+processed/data_19.pt
+processed/data_2.pt
+processed/data_20.pt
+processed/data_21.pt
+processed/data_22.pt
+processed/data_23.pt
+processed/data_24.pt
+processed/data_25.pt
+processed/data_26.pt
+processed/data_27.pt
+processed/data_28.pt
+processed/data_29.pt
+processed/data_3.pt
+processed/data_30.pt
+processed/data_31.pt
+processed/data_32.pt
+processed/data_33.pt
+processed/data_34.pt
+processed/data_35.pt
+processed/data_36.pt
+processed/data_37.pt
+processed/data_38.pt
+processed/data_39.pt
+processed/data_4.pt
+processed/data_40.pt
+processed/data_41.pt
+processed/data_42.pt
+processed/data_43.pt
+processed/data_44.pt
+processed/data_45.pt
+processed/data_46.pt
+processed/data_47.pt
+processed/data_48.pt
+processed/data_49.pt
+processed/data_5.pt
+processed/data_6.pt
+processed/data_7.pt
+processed/data_8.pt
+processed/data_9.pt
+
+sent 120.83M bytes  received 967 bytes  1.11M bytes/sec
+total size is 5.57G  speedup is 46.13
+DeepGCN.py
+LinEvalModel.py
+MolCLR.py
+MolMAE.py
+clr_pretraining.py
+cnn_pretraining.py
+conformers.py
+dataset.py
+evaluation.py
+finetuning.py
+large_dataset.py
+lineval.py
+mae_pretraining.py
+metrics.py
+molGraphConvFeaturizer.py
+nt_xent.py
+smiles2graphs.py
+utils.py
+
+sent 39.52K bytes  received 358 bytes  79.75K bytes/sec
+total size is 167.83K  speedup is 4.21
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+
+  | Name      | Type       | Params
+-----------------------------------------
+0 | loss_func | NTXentLoss | 0     
+1 | model     | PreModel   | 652 K 
+-----------------------------------------
+652 K     Trainable params
+0         Non-trainable params
+652 K     Total params
+2.609     Total estimated model params size (MB)
+`Trainer.fit` stopped: `max_epochs=20` reached.
+PreModel(
+  (encoder): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=11, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (feat_lin): Linear(in_features=128, out_features=128, bias=True)
+  (out_lin): Sequential(
+    (0): Linear(in_features=128, out_features=128, bias=True)
+    (1): ReLU(inplace=True)
+    (2): Linear(in_features=128, out_features=64, bias=True)
+  )
+)
+
+epoch_val:Ep0000|| Loss: 5.50033
+
+
+epoch_val:Ep0000|| Loss: 0.25413
+
+
+epoch_trn:Ep0000|| Loss: 0.57242
+
+
+epoch_val:Ep0001|| Loss: 0.19956
+
+
+epoch_trn:Ep0001|| Loss: 0.19524
+
+
+epoch_val:Ep0002|| Loss: 0.18615
+
+
+epoch_trn:Ep0002|| Loss: 0.13439
+
+
+epoch_val:Ep0003|| Loss: 0.16878
+
+
+epoch_trn:Ep0003|| Loss: 0.10392
+
+
+epoch_val:Ep0004|| Loss: 0.15702
+
+
+epoch_trn:Ep0004|| Loss: 0.08794
+
+
+epoch_val:Ep0005|| Loss: 0.16578
+
+
+epoch_trn:Ep0005|| Loss: 0.07911
+
+
+epoch_val:Ep0006|| Loss: 0.15652
+
+
+epoch_trn:Ep0006|| Loss: 0.07268
+
+
+epoch_val:Ep0007|| Loss: 0.17928
+
+
+epoch_trn:Ep0007|| Loss: 0.06897
+
+
+epoch_val:Ep0008|| Loss: 0.19681
+
+
+epoch_trn:Ep0008|| Loss: 0.06620
+
+
+epoch_val:Ep0009|| Loss: 0.16558
+
+
+epoch_trn:Ep0009|| Loss: 0.06391
+
+
+epoch_val:Ep0010|| Loss: 0.17756
+
+
+epoch_trn:Ep0010|| Loss: 0.06116
+
+
+epoch_val:Ep0011|| Loss: 0.21009
+
+
+epoch_trn:Ep0011|| Loss: 0.06032
+
+
+epoch_val:Ep0012|| Loss: 0.18565
+
+
+epoch_trn:Ep0012|| Loss: 0.05845
+
+
+epoch_val:Ep0013|| Loss: 0.18045
+
+
+epoch_trn:Ep0013|| Loss: 0.05730
+
+
+epoch_val:Ep0014|| Loss: 0.19848
+
+
+epoch_trn:Ep0014|| Loss: 0.05677
+
+
+epoch_val:Ep0015|| Loss: 0.20877
+
+Epoch 00017: reducing learning rate of group 0 to 1.0000e-04.
+
+epoch_trn:Ep0015|| Loss: 0.05606
+
+
+epoch_val:Ep0016|| Loss: 0.15268
+
+
+epoch_trn:Ep0016|| Loss: 0.04815
+
+
+epoch_val:Ep0017|| Loss: 0.15937
+
+
+epoch_trn:Ep0017|| Loss: 0.04735
+
+
+epoch_val:Ep0018|| Loss: 0.19331
+
+
+epoch_trn:Ep0018|| Loss: 0.04687
+
+
+epoch_val:Ep0019|| Loss: 0.16044
+
+sending incremental file list
+model_checkpoints/clr_epoch_20_layers_4_random/
+model_checkpoints/clr_epoch_20_layers_4_random/epoch=16-step=59755.ckpt
+model_checkpoints/clr_epoch_20_layers_4_random/last.ckpt
+model_checkpoints/clr_epoch_20_layers_4_random/lightning_logs/
+model_checkpoints/clr_epoch_20_layers_4_random/lightning_logs/version_1776173/
+model_checkpoints/clr_epoch_20_layers_4_random/lightning_logs/version_1776173/events.out.tfevents.1706826506.landonia02.inf.ed.ac.uk.1069972.0
+model_checkpoints/clr_epoch_20_layers_4_random/lightning_logs/version_1776173/hparams.yaml
+model_checkpoints/epoch_80_layers_4_random/epoch=74-step=263625.ckpt
+model_checkpoints/epoch_80_layers_4_random/epoch=9-step=35150.ckpt
+model_checkpoints/epoch_80_layers_4_random/last-v1.ckpt
+model_checkpoints/epoch_80_layers_4_random/last.ckpt
+model_checkpoints/epoch_80_layers_4_random/lightning_logs/version_1773782/events.out.tfevents.1706479656.landonia02.inf.ed.ac.uk.805849.0
+model_checkpoints/epoch_80_layers_4_random/lightning_logs/version_1773782/hparams.yaml
+model_checkpoints/epoch_80_layers_4_random/lightning_logs/version_1775424/events.out.tfevents.1706710947.landonia02.inf.ed.ac.uk.969672.0
+model_checkpoints/epoch_80_layers_4_random/lightning_logs/version_1775424/hparams.yaml
+model_checkpoints/epoch_80_layers_4_random/lightning_logs/version_1775428/events.out.tfevents.1706712117.landonia02.inf.ed.ac.uk.970550.0
+model_checkpoints/epoch_80_layers_4_random/lightning_logs/version_1775428/hparams.yaml
+model_checkpoints/epoch_80_layers_4_random/lightning_logs/version_1775450/events.out.tfevents.1706713634.landonia02.inf.ed.ac.uk.971771.0
+model_checkpoints/epoch_80_layers_4_random/lightning_logs/version_1775450/hparams.yaml
+
+sent 49.01M bytes  received 359 bytes  8.91M bytes/sec
+total size is 53.72M  speedup is 1.10
+
+=============
+job finished successfully
+Job finished: 02/02/2024 00:28:45
