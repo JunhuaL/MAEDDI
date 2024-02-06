@@ -158,7 +158,9 @@ class EntryDataset(InMemoryDataset):
         self.entryIDs = drug_df.drugID.values
         
         mols_list = list(map(Chem.MolFromSmiles, drug_df.SMILES))  # some SMILES maybe are failed to parse
-        mols_list = [mol for mol in mols_list if mol] 
+        none_inds = [i for i,val in enumerate(mols_list) if val == None]
+        mols_list = [mol for mol in mols_list if mol]
+        self.entryIDs = np.delete(self.entryIDs,none_inds)
         featurizer = user_MolGraphConvFeaturizer(use_edges=True,use_chirality=True,use_partial_charge=True)
         deepchem_list = featurizer.featurize(mols_list)
         print("featurize complete")
@@ -478,7 +480,7 @@ class MultiEmbedDataset_v1(data.Dataset):
             print('the order of entryIDs are not the same in dataset 1 & 2 .')
             self.datasets2_idx = {idx: self.datset2_entryIDs.index(entry)  for idx,entry in  enumerate(self.entryIDs)}
         else:
-            self.datasets2_idx  = {idx:idx  for idx,entry  in enumerate(self.entryIDs)}
+            self.datasets2_idx  = {idx:idx  for idx,entry  in enumerate(self.datset2_entryIDs)}
         for x,y in self.datasets2_idx.items():
             if self.datasets[0].entryIDs[x] != self.datasets[1].entryIDs[y]:
                 print('id1 != id2 !',self.datasets[0].entryIDs[x], self.datasets[1].entryIDs[y])
@@ -613,8 +615,8 @@ class DeepDrug_Dataset(LightningDataModule):
         else:
             self.entry2_dataset = self.entry1_dataset
 
-        self.pair_labels = pd.read_csv(self.pair_labels_file,header=0,index_col=None).values#.astype(self.y_type)
-        self.entry_pairs = pd.read_csv(self.entry_pairs_file,header=0,index_col = None).values#.astype(str)
+        self.pair_labels = pd.read_csv(self.pair_labels_file,header=0,index_col=[0]).values#.astype(self.y_type)
+        self.entry_pairs = pd.read_csv(self.entry_pairs_file,header=0,index_col=[0]).values#.astype(str)
         self.data_split = evaluation.Split_Strats(self.entry_pairs_file,self.entry1_seq_file,clustering='cluster' in self.split_strat)
         # print('entry_pairs:',self.entry_pairs[:5])
 

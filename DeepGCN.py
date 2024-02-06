@@ -230,7 +230,7 @@ class SAGEConvV2(MessagePassing):
                                         nn.ReLU(),
                                         nn.Linear(in_channels[0]*2 , out_channels, bias=bias),
                         )
-        self.reset_parameters()
+        # self.reset_parameters()
 
     def reset_parameters(self,):
         # self.lin_l.reset_parameters()
