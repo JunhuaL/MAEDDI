@@ -554,11 +554,16 @@ class DeepDrug_Dataset(LightningDataModule):
             self.entry2_type = 'protein'
         else:raise 
 
-
-        self.entry2_multi_embed = True 
-        self.entry2_seq_file = entry2_seq_file
-        self.entry1_multi_embed = True 
-        self.entry1_seq_file = entry1_seq_file
+        
+        if entry1_seq_file and entry2_seq_file:
+            self.entry2_multi_embed = True 
+            self.entry2_seq_file = entry2_seq_file
+            self.entry1_multi_embed = True 
+            self.entry1_seq_file = entry1_seq_file
+        else:
+            self.entry1_seq_file = entry1_seq_file
+            self.entry1_multi_embed = False
+            self.entry2_multi_embed = False
 
         
         assert self.entry2_type in ['protein','drug']

@@ -54,9 +54,9 @@ class MyCrossEntropyLoss(t.nn.Module):
 class DeepDrug(nn.Module):
     def __init__(self,in_dim,enc_num_hidden,num_out_dim=1,out_activation_func = 'softmax',
                  dropout_ratio=0.1,num_layers = 22,
-                 entry1_seq_len=200,in_edge_channel=11,mid_edge_channel=128, linEval=False):
+                 entry1_seq_len=200,in_edge_channel=11,mid_edge_channel=128, linEval=False,use_seq=True):
         super(DeepDrug,self).__init__()
-
+        self.use_seq = use_seq
         self.out_activation_func = out_activation_func
         self.dropout_ratio = dropout_ratio
 
@@ -67,13 +67,15 @@ class DeepDrug(nn.Module):
                                  mid_edge_channel=mid_edge_channel,aggr='softmax')
         dim_gconv1_out = enc_num_hidden
         
-        self.gconv1_seq = CNN(len(smile_dict),enc_num_hidden,seq_len=entry1_seq_len,decoder=False,pretraining=False)
-        dim_gconv1_seq_out = enc_num_hidden
-        dim_gconv1_out += dim_gconv1_seq_out
+        if use_seq:
+            self.gconv1_seq = CNN(len(smile_dict),enc_num_hidden,seq_len=entry1_seq_len,decoder=False,pretraining=False)
+            dim_gconv1_seq_out = enc_num_hidden
+            dim_gconv1_out += dim_gconv1_seq_out
+            self.gconv2_seq = self.gconv1_seq
 
         self.gconv2 = self.gconv1
         dim_gconv2_out = dim_gconv1_out
-        self.gconv2_seq = self.gconv1_seq
+        
 
         if linEval:
             for param in self.gconv1.parameters():
@@ -104,20 +106,25 @@ class DeepDrug(nn.Module):
         self.apply(init_linear)
 
     def forward(self,entry1_data,entry2_data,get_latent_variable=False):
-        entry1_data,entry1_seq_data = entry1_data
-        entry2_data,entry2_seq_data = entry2_data
+        if self.use_seq:
+            entry1_data,entry1_seq_data = entry1_data
+            entry2_data,entry2_seq_data = entry2_data
 
         entry1_x,entry1_edge_index,entry1_edge_attr,entry1_batch = entry1_data.x,entry1_data.edge_index,entry1_data.edge_attr,entry1_data.batch
         entry1_out_node, entry1_out_edge = self.gconv1(entry1_x,entry1_edge_index,entry1_edge_attr,entry1_batch)
         entry1_mean = global_mean_pool(entry1_out_node,entry1_batch)
-        entry1_seq_mean = self.gconv1_seq(entry1_seq_data)
-        entry1_mean = t.cat([entry1_mean,entry1_seq_mean],dim=-1)
+        
+        if self.use_seq:
+            entry1_seq_mean = self.gconv1_seq(entry1_seq_data)
+            entry1_mean = t.cat([entry1_mean,entry1_seq_mean],dim=-1)
 
         entry2_x,entry2_edge_index,entry2_edge_attr,entry2_batch = entry2_data.x,entry2_data.edge_index,entry2_data.edge_attr,entry2_data.batch
         entry2_out_node, entry2_out_edge = self.gconv2(entry2_x,entry2_edge_index,entry2_edge_attr,entry2_batch)
         entry2_mean = global_mean_pool(entry2_out_node,entry2_batch)
-        entry2_seq_mean = self.gconv2_seq(entry2_seq_data)
-        entry2_mean = t.cat([entry2_mean,entry2_seq_mean],dim=-1)
+        
+        if self.use_seq:
+            entry2_seq_mean = self.gconv2_seq(entry2_seq_data)
+            entry2_mean = t.cat([entry2_mean,entry2_seq_mean],dim=-1)
 
         cat_features = t.cat([entry1_mean,entry2_mean],dim=-1)
         x = self.global_fc_nn(cat_features)
@@ -137,7 +144,7 @@ class DeepDrug_Container(LightningModule):
     def __init__(self,num_out_dim=1, task_type = 'multi_classification',
                  lr = 0.001, category = None, verbose=True, my_logging=False, 
                  scheduler_ReduceLROnPlateau_tracking='mse',
-                 model_type = 'deepdrug', linEval=False, n_layers=22):
+                 model_type = 'deepdrug', linEval=False, n_layers=22,use_seq=True):
         super().__init__()
 
         self.save_hyperparameters()
@@ -177,7 +184,7 @@ class DeepDrug_Container(LightningModule):
             self.model = DeepDrug(num_out_dim=num_out_dim,out_activation_func = out_activation_func,
                                 in_dim=self.entry2_in_channel,enc_num_hidden=128,num_layers=self.entry2_num_graph_layer,
                                 entry1_seq_len=self.entry2_seq_len,in_edge_channel=self.entry2_in_edge_channel,
-                                mid_edge_channel=128, linEval = linEval,dropout_ratio=0.2
+                                mid_edge_channel=128, linEval = linEval,dropout_ratio=0.2,use_seq=use_seq
                                 )
         else:
             raise
