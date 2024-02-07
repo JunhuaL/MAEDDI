@@ -15,7 +15,7 @@ echo "Activating conda environment: ${CONDA_ENV_NAME}"
 conda activate ${CONDA_ENV_NAME}
 
 export https_proxy=wwwcache.inf.ed.ac.uk:3128
-python clr_finetuning.py --configfile=./configs/mae_clr_exps/clr_config.yml
+python clr_finetuning.py --configfile=./configs/mae_clr_exps/clr_config.no_seq.yml
 
 echo ""
 echo "============="

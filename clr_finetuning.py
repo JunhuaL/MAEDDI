@@ -35,10 +35,10 @@ if __name__ == '__main__':
 
     entry1_data_folder = '/'.join(args.entry1_file.split('/')[:-2])
     entry2_data_folder = '/'.join(args.entry2_file.split('/')[:-2])
-    entry2_seq_file = args.entry2_seq_file
+    entry2_seq_file = args.__dict__.get('entry2_seq_file')
     entry1_seq_file = args.entry1_seq_file
-    assert os.path.exists(entry1_seq_file),'file does not exist: %s.'%entry1_seq_file 
-    assert os.path.exists(entry2_seq_file),'file does not exist: %s.'%entry2_seq_file
+    # assert os.path.exists(entry1_seq_file),'file does not exist: %s.'%entry1_seq_file 
+    # assert os.path.exists(entry2_seq_file),'file does not exist: %s.'%entry2_seq_file
     entry_pairs_file = args.pair_file
     pair_labels_file = args.label_file 
     save_folder = args.save_folder 
@@ -102,13 +102,14 @@ if __name__ == '__main__':
                             task_type = task_type,category=category,
                             scheduler_ReduceLROnPlateau_tracking=scheduler_ReduceLROnPlateau_tracking,
                             num_out_dim = num_out_dim, model_type=model_type,
-                            n_layers = n_layers
+                            n_layers = n_layers,
+                            use_seq = True if entry2_seq_file else False
                             )
 
     if gconv_ckpt and cnn_ckpt:
         empty_rgcn = PreModel_Container(119,128,n_layers)
         empty_rgcn.load_from_checkpoint(gconv_ckpt)
-        model.model.gconv1.load_state_dict(empty_rgcn.model.encoder.state_dict())
+        model.model.gconv1. load_state_dict(empty_rgcn.model.encoder.state_dict())
 
     if lin_Eval:
         for param in model.model.gconv1.parameters():
@@ -124,7 +125,7 @@ if __name__ == '__main__':
         earlystopping_mode = 'max'
         earlystopping_min_delta = 0.001
     else:
-        raise 
+        raise
     checkpoint_callback = pl_callbacks.ModelCheckpoint(dirpath=save_model_folder,
                                         mode = earlystopping_mode,
                                         monitor=earlystopping_tracking,
@@ -133,7 +134,7 @@ if __name__ == '__main__':
                                         mode = earlystopping_mode,
                                         min_delta=earlystopping_min_delta,
                                         patience=10,)
-    
+
     trainer = Trainer(
                     gpus=[gpus,],
                     accelerator=None,

@@ -35,10 +35,10 @@ if __name__ == '__main__':
 
     entry1_data_folder = '/'.join(args.entry1_file.split('/')[:-2])
     entry2_data_folder = '/'.join(args.entry2_file.split('/')[:-2])
-    entry2_seq_file = args.entry2_seq_file
+    entry2_seq_file = args.__dict__.get('entry2_seq_file')
     entry1_seq_file = args.entry1_seq_file
-    assert os.path.exists(entry1_seq_file),'file does not exist: %s.'%entry1_seq_file 
-    assert os.path.exists(entry2_seq_file),'file does not exist: %s.'%entry2_seq_file
+    #assert os.path.exists(entry1_seq_file),'file does not exist: %s.'%entry1_seq_file 
+    #assert os.path.exists(entry2_seq_file),'file does not exist: %s.'%entry2_seq_file
     entry_pairs_file = args.pair_file
     pair_labels_file = args.label_file 
     save_folder = args.save_folder 
@@ -101,7 +101,7 @@ if __name__ == '__main__':
                             task_type = task_type,category=category,
                             scheduler_ReduceLROnPlateau_tracking=scheduler_ReduceLROnPlateau_tracking,
                             num_out_dim = num_out_dim, model_type=model_type,
-                            n_layers = n_layers,use_seq=True
+                            n_layers = n_layers,use_seq=True if entry2_seq_file else False
                             )
 
     for gcn_block in model.model.gconv1.gcn_blocks:

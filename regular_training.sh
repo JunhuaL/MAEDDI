@@ -15,7 +15,7 @@ echo "Activating conda environment: ${CONDA_ENV_NAME}"
 conda activate ${CONDA_ENV_NAME}
 
 export https_proxy=wwwcache.inf.ed.ac.uk:3128
-python regular_deepdrug.py --configfile=./configs/DrugBank.binary.all_cluster.yml
+python regular_deepdrug.py --configfile=./configs/DrugBank.no_seq.all_cluster.yml
 
 echo ""
 echo "============="
