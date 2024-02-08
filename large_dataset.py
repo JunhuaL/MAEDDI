@@ -6,8 +6,8 @@ from torch_geometric.data import (InMemoryDataset, Data,DataLoader)
 from torch_geometric.data.separate import separate
 from torch_geometric.data.collate import collate
 from torch_geometric.utils import degree as geo_degree
-
 from pytorch_lightning import (LightningDataModule,)
+from dataset import SeqDataset
 
 def graph_add_degree(data,degree='both'):
     # print('data:',data,type(data))
@@ -19,7 +19,7 @@ def graph_add_degree(data,degree='both'):
     return data 
 
 class Large_MolDataset(t.utils.data.Dataset):
-    def __init__(self, data_dir,split_entry_ids=None):
+    def __init__(self, data_dir):
         filenames = os.listdir(data_dir)
         self.data_paths = [data_dir+name for name in filenames]
 
@@ -43,27 +43,6 @@ class Large_MolDataset(t.utils.data.Dataset):
                                           increment=False,
                                           add_batch=False)
 
-        if split_entry_ids is not None:
-            index = np.argsort(self.entry_ids)
-            ypos = np.searchsorted(self.entry_ids[index],split_entry_ids)
-            split_indices = index[ypos]
-            
-            temp_data = []
-            self.entry_ids = split_entry_ids
-            for i in split_indices:
-                x = separate(cls=self.data.__class__,
-                            batch=self.data,
-                            idx=i,
-                            slice_dict=self.slices,
-                            decrement=False
-                        )
-                temp_data.append(x)
-            self.data, self.slices, _ = collate(cls=temp_data[0].__class__,
-                                                data_list=temp_data,
-                                                increment=False,
-                                                add_batch=False
-                                            )
-
         self.num_samples = len(self.entry_ids)
 
     def __getitem__(self, idx):
@@ -77,24 +56,49 @@ class Large_MolDataset(t.utils.data.Dataset):
     def __len__(self):
         return self.num_samples
 
+class Large_MolWrapper(t.utils.data.Dataset):
+    def __init__(self,dataset,entryIDs):
+        self.dataset = dataset
+        self.entryIDs = entryIDs
+        self.num_samples = len(entryIDs)
+        self.dataset_entryIDs = dataset.entryIDs.tolist()
+        
+    def __getitem__(self, idx):
+        return self.dataset[self.dataset_entryIDs.index(self.entryIDs[idx])]
+    
+    def __len__(self):
+        return self.num_samples
+
+class Large_MultiEmbedDataset(t.utils.data.Dataset):
+    def __init__(self,datasets):
+        self.datasets = datasets
+        self.num_samples = len(self.datasets[0])
+        self.entryIDs = self.datasets[0].entry_ids
+        print('checking entryIDs finished for Mol_Wrapper.')
+    
+    def __getitem__(self,idx):
+        return [self.datasets[0][idx], self.datasets[1][idx]]
+    
+    def __len__(self):
+        return self.num_samples
 
 class Large_PretrainingDataset(LightningDataModule):
-    def __init__(self,data_folder,batch_size=128):
+    def __init__(self,data_folder,use_seq=False,batch_size=128):
         super().__init__()
         self.data_folder = data_folder
         self.batch_size = batch_size
+        self.use_seq = use_seq
 
     def prepare_data(self):
         pass
 
     def my_prepare_data(self):
-        self.dataset = []
-        files = [self.data_folder + file for file in os.listdir(self.data_folder)]
-        for file in files:
-            _,_,entry_ids = t.load(file)
-            self.dataset.append(entry_ids)
-        self.dataset = np.concatenate(self.dataset)
-
+        self.dataset = Large_MolDataset(self.data_folder)
+        if self.use_seq:
+            csv_dir = '/'.join(self.data_folder.split('/')[:-2]) + '/drug.csv' 
+            self.seq_data = SeqDataset(csv_dir,data_type='drug',onehot=True)
+            self.dataset = Large_MultiEmbedDataset([self.dataset,self.seq_data])
+        
         num_samples = len(self.dataset)
         tmp_indxs = np.random.permutation(num_samples)
         self.train_indxs = tmp_indxs[:int(num_samples*0.9)]
@@ -105,13 +109,15 @@ class Large_PretrainingDataset(LightningDataModule):
         pass
 
     def train_dataloader(self):
-        train_ids = self.dataset[self.train_indxs]
-        train_split = Large_MolDataset(self.data_folder,train_ids)
-        dataloader = DataLoader(train_split,num_workers=0,shuffle=True,batch_size=self.batch_size,pin_memory=True,drop_last=True)
+        print("In train loader..")
+        train_ids = self.dataset.entryIDs[self.train_indxs]
+        train_split = Large_MolWrapper(self.dataset,train_ids)
+        dataloader = DataLoader(train_split,num_workers=0,shuffle=False,batch_size=self.batch_size,pin_memory=True,drop_last=True)
         return dataloader
 
     def val_dataloader(self):
-        valid_ids = self.dataset[self.valid_indxs]
-        valid_split = Large_MolDataset(self.data_folder,valid_ids)
+        print("In valid loader..")
+        valid_ids = self.dataset.entryIDs[self.valid_indxs]
+        valid_split = Large_MolWrapper(self.dataset,valid_ids)
         dataloader = DataLoader(valid_split,num_workers=0,shuffle=False,batch_size=self.batch_size,pin_memory=True,drop_last=True)
         return dataloader  
