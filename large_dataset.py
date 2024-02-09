@@ -24,7 +24,7 @@ class Large_MolDataset(t.utils.data.Dataset):
         self.data_paths = [data_dir+name for name in filenames]
 
         self.data = [] 
-        self.entry_ids = []
+        self.entryIDs = []
         for file in self.data_paths:
             temp_data,slices,entry_ids = t.load(file)
             for i in range(len(entry_ids)):
@@ -35,15 +35,15 @@ class Large_MolDataset(t.utils.data.Dataset):
                                 decrement=False
                         )
                 self.data.append(graph_add_degree(x))
-            self.entry_ids.append(entry_ids)
+            self.entryIDs.append(entry_ids)
         
-        self.entry_ids = np.concatenate(self.entry_ids)
+        self.entryIDs = np.concatenate(self.entryIDs)
         self.data,self.slices,_ = collate(cls=self.data[0].__class__,
                                           data_list=self.data,
                                           increment=False,
                                           add_batch=False)
 
-        self.num_samples = len(self.entry_ids)
+        self.num_samples = len(self.entryIDs)
 
     def __getitem__(self, idx):
         data = separate(cls=self.data.__class__,
@@ -61,10 +61,11 @@ class Large_MolWrapper(t.utils.data.Dataset):
         self.dataset = dataset
         self.entryIDs = entryIDs
         self.num_samples = len(entryIDs)
-        self.dataset_entryIDs = dataset.entryIDs.tolist()
+        self.dataset_entryIDs = dataset.entryIDs
+        self.entryIDs_idxs = np.searchsorted(self.dataset_entryIDs,self.entryIDs)
         
     def __getitem__(self, idx):
-        return self.dataset[self.dataset_entryIDs.index(self.entryIDs[idx])]
+        return self.dataset[self.entryIDs_idxs[idx]]
     
     def __len__(self):
         return self.num_samples
@@ -73,7 +74,7 @@ class Large_MultiEmbedDataset(t.utils.data.Dataset):
     def __init__(self,datasets):
         self.datasets = datasets
         self.num_samples = len(self.datasets[0])
-        self.entryIDs = self.datasets[0].entry_ids
+        self.entryIDs = self.datasets[0].entryIDs
         print('checking entryIDs finished for Mol_Wrapper.')
     
     def __getitem__(self,idx):

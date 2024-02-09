@@ -24,7 +24,6 @@ if [ -d "s1950841" ]; then
 else
     mkdir s1950841
     cd s1950841
-
 fi
 
 mkdir dataset
