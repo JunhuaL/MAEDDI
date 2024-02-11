@@ -1,0 +1,195 @@
+Job running on landonia08
+Job started: 09/02/2024 03:43:12
+Setting up bash environment
+Activating conda environment: masters
+drug.csv
+
+sent 5.01M bytes  received 35 bytes  1.43M bytes/sec
+total size is 23.50M  speedup is 4.69
+sending incremental file list
+processed/data_0.pt
+processed/data_1.pt
+processed/data_10.pt
+processed/data_11.pt
+processed/data_12.pt
+processed/data_13.pt
+processed/data_14.pt
+processed/data_15.pt
+processed/data_16.pt
+processed/data_17.pt
+processed/data_18.pt
+processed/data_19.pt
+processed/data_2.pt
+processed/data_20.pt
+processed/data_21.pt
+processed/data_22.pt
+processed/data_23.pt
+processed/data_24.pt
+processed/data_25.pt
+processed/data_26.pt
+processed/data_27.pt
+processed/data_28.pt
+processed/data_29.pt
+processed/data_3.pt
+processed/data_30.pt
+processed/data_31.pt
+processed/data_32.pt
+processed/data_33.pt
+processed/data_34.pt
+processed/data_35.pt
+processed/data_36.pt
+processed/data_37.pt
+processed/data_38.pt
+processed/data_39.pt
+processed/data_4.pt
+processed/data_40.pt
+processed/data_41.pt
+processed/data_42.pt
+processed/data_43.pt
+processed/data_44.pt
+processed/data_45.pt
+processed/data_46.pt
+processed/data_47.pt
+processed/data_48.pt
+processed/data_49.pt
+processed/data_5.pt
+processed/data_6.pt
+processed/data_7.pt
+processed/data_8.pt
+processed/data_9.pt
+
+sent 120.83M bytes  received 967 bytes  1.12M bytes/sec
+total size is 5.57G  speedup is 46.13
+DeepGCN.py
+LinEvalModel.py
+MolCLR.py
+MolMAE.py
+SeqGraphCLR.py
+SeqGraphCLR_pretraining.py
+clr_finetuning.py
+clr_pretraining.py
+cnn_pretraining.py
+conformers.py
+dataset.py
+evaluation.py
+large_dataset.py
+mae_finetuning.py
+mae_pretraining.py
+metrics.py
+molGraphConvFeaturizer.py
+nt_xent.py
+regular_deepdrug.py
+smiles2graphs.py
+utils.py
+
+sent 46.66K bytes  received 415 bytes  94.14K bytes/sec
+total size is 195.82K  speedup is 4.16
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+
+  | Name      | Type       | Params
+-----------------------------------------
+0 | loss_func | NTXentLoss | 0     
+1 | model     | PreModel   | 734 K 
+-----------------------------------------
+734 K     Trainable params
+0         Non-trainable params
+734 K     Total params
+2.940     Total estimated model params size (MB)
+PreModel(
+  (conv): CNN(
+    (conv): ModuleList(
+      (0): Conv1d(67, 32, kernel_size=(4,), stride=(1,))
+      (1): Conv1d(32, 64, kernel_size=(6,), stride=(1,))
+      (2): Conv1d(64, 96, kernel_size=(8,), stride=(1,))
+    )
+    (fc1): Linear(in_features=96, out_features=128, bias=True)
+  )
+  (gconv): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=11, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (feat_lin): Linear(in_features=128, out_features=128, bias=True)
+  (out_lin): Sequential(
+    (0): Linear(in_features=128, out_features=128, bias=True)
+    (1): ReLU(inplace=True)
+    (2): Linear(in_features=128, out_features=64, bias=True)
+  )
+)
+print save parquet file to load quickly next time at ./dataset/Chemberta/drug/drug.parquet
+                                                    SMILES                                              entry
+drug_ID                                                                                                      
+CM_1       Cc1cccc(N2CCN(C(=O)C34CC5CC(CC(C5)C3)C4)CC2)c1C  [21, 1, 25, 1, 1, 1, 1, 55, 30, 10, 21, 21, 30...
+CM_2                   Cn1ccnc1SCC(=O)Nc1ccc(Oc2ccccc2)cc1  [21, 50, 25, 1, 1, 50, 1, 25, 56, 21, 21, 55, ...
+CM_3     COc1cc2c(cc1NC(=O)CN1C(=O)NC3(CCc4ccccc43)C1=O...  [21, 64, 1, 25, 1, 1, 10, 1, 55, 1, 1, 25, 30,...
+CM_4     O=C1/C(=C/NC2CCS(=O)(=O)C2)c2ccccc2C(=O)N1c1cc...  [64, 48, 21, 25, 45, 21, 55, 48, 21, 45, 30, 2...
+checking entryIDs finished for Mol_Wrapper.
+Sanity Checking: 0it [00:00, ?it/s]In valid loader..
+Traceback (most recent call last):
+  File "SeqGraphCLR_pretraining.py", line 55, in <module>
+    trainer.fit(model, datamodule=datamodule,)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 582, in fit
+    call._call_and_handle_interrupt(
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/call.py", line 38, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 624, in _fit_impl
+    self._run(model, ckpt_path=self.ckpt_path)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1061, in _run
+    results = self._run_stage()
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1140, in _run_stage
+    self._run_train()
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1153, in _run_train
+    self._run_sanity_check()
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1225, in _run_sanity_check
+    val_loop.run()
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/loops/loop.py", line 199, in run
+    self.advance(*args, **kwargs)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/loops/dataloader/evaluation_loop.py", line 152, in advance
+    dl_outputs = self.epoch_loop.run(self._data_fetcher, dl_max_batches, kwargs)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/loops/loop.py", line 199, in run
+    self.advance(*args, **kwargs)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 121, in advance
+    batch = next(data_fetcher)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/utilities/fetching.py", line 184, in __next__
+    return self.fetching_function()
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/utilities/fetching.py", line 265, in fetching_function
+    self._fetch_next_batch(self.dataloader_iter)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/utilities/fetching.py", line 280, in _fetch_next_batch
+    batch = next(iterator)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 681, in __next__
+    data = self._next_data()
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 721, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 49, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 49, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/disk/scratch_big/s1950841/large_dataset.py", line 68, in __getitem__
+    return self.dataset[self.entryIDs_idxs[idx]]
+  File "/disk/scratch_big/s1950841/large_dataset.py", line 81, in __getitem__
+    return [self.datasets[0][idx], self.datasets[1][idx]]
+  File "/disk/scratch_big/s1950841/large_dataset.py", line 49, in __getitem__
+    data = separate(cls=self.data.__class__,
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/torch_geometric/data/separate.py", line 38, in separate
+    data_store[attr] = _separate(attr, batch_store[attr], idx, slices,
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/torch_geometric/data/separate.py", line 65, in _separate
+    start, end = int(slices[idx]), int(slices[idx + 1])
+IndexError: index 499969 is out of bounds for dimension 0 with size 499969
+                                   

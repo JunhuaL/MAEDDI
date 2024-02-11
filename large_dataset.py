@@ -62,11 +62,15 @@ class Large_MolWrapper(t.utils.data.Dataset):
         self.entryIDs = entryIDs
         self.num_samples = len(entryIDs)
         self.dataset_entryIDs = dataset.entryIDs
-        self.entryIDs_idxs = np.searchsorted(self.dataset_entryIDs,self.entryIDs)
-        
+
+        index = np.argsort(self.dataset_entryIDs)
+        sorted_entryIDs = self.dataset_entryIDs[index]
+
+        self.entryIDs_idxs = np.searchsorted(sorted_entryIDs,self.entryIDs)
+
     def __getitem__(self, idx):
         return self.dataset[self.entryIDs_idxs[idx]]
-    
+
     def __len__(self):
         return self.num_samples
 

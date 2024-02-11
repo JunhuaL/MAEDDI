@@ -24,15 +24,14 @@ if [ -d "s1950841" ]; then
 else
     mkdir s1950841
     cd s1950841
+    mkdir dataset
+    cd dataset
+    mkdir Chemberta
+    cd Chemberta
+    mkdir drug
+    cd drug
+    mkdir processed
 fi
-
-mkdir dataset
-cd dataset
-mkdir Chemberta
-cd Chemberta
-mkdir drug
-cd drug
-mkdir processed
 
 rsync -vhz --partial --inplace /home/s1950841/MAEDDI/dataset/Chemberta/drug/drug.csv .
 rsync -rvhz --partial --inplace /home/s1950841/MAEDDI/dataset/Chemberta/drug/processed .
@@ -42,7 +41,7 @@ rsync -vhz --partial --inplace /home/s1950841/MAEDDI/*.py .
 
 python SeqGraphCLR_pretraining.py 80 4 random
 
-rsync -rvhz ./model_checkpoints/home/s1950841/MAEDDI/
+rsync -rvhz ./model_checkpoints /home/s1950841/MAEDDI/
 
 echo ""
 echo "============="
