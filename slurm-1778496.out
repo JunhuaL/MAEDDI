@@ -1,5 +1,0 @@
-Job running on landonia02
-Job started: 10/02/2024 12:50:05
-Setting up bash environment
-Activating conda environment: masters
-mkdir: cannot create directory ‘dataset’: File exists
