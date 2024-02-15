@@ -137,7 +137,7 @@ class DeepDrug(nn.Module):
             elif self.out_activation_func == 'sigmoid':
                 return t.sigmoid(x)
             elif self.out_activation_func is None:
-                return x
+                return entry1_mean, entry2_mean
     
 
 class DeepDrug_Container(LightningModule):
@@ -177,7 +177,7 @@ class DeepDrug_Container(LightningModule):
             out_activation_func = 'sigmoid'
             self.loss_func = F.binary_cross_entropy
         else:
-            raise 
+            out_activation_func = None
         
         assert self.model_type in ['deepdrug','geometric']
         if self.model_type == 'deepdrug':
