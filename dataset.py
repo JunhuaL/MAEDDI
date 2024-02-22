@@ -198,7 +198,6 @@ class EntryDataset(InMemoryDataset):
     def large_drug_process(self,
                           drug_df_dir, flag_add_self_loops=False,
                           default_dim_features=119,default_dim_nodes=50,use_edges=True):
-        import deepchem as dc
         from rdkit import Chem
         from tqdm import tqdm
         import subprocess
@@ -213,7 +212,7 @@ class EntryDataset(InMemoryDataset):
         remainder_partition = 0 if (csv_no_lines % nrows) == 0 else 1
         total_partitions = full_partitions + remainder_partition
         
-        featurizer = user_MolGraphConvFeaturizer(use_edges=True,use_chirality=True,use_partial_charge=True)
+        featurizer = user_MolGraphConvFeaturizer(use_edges=use_edges,use_chirality=True,use_partial_charge=True)
         print("Initialization complete")
         for p in range(total_partitions):
             print(f"Starting featurization of partition {p}")

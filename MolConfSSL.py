@@ -1,16 +1,19 @@
+from typing import Any, List, Union
 import numpy as np 
 import warnings
+from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 warnings.filterwarnings('ignore')
+import torch
 import torch as t 
+import torch.nn.functional as F
 from torch import nn 
 import torch.nn.functional as F
 from pytorch_lightning import LightningModule
 from utils import *
 from DeepGCN import *
-from itertools import chain
 from nt_xent import NTXentLoss
 
-class PreModel(nn.Module):
+class CLRModel(nn.Module):
     def __init__(self, 
                  in_dim: int, 
                  enc_num_hidden: int, 
@@ -18,21 +21,28 @@ class PreModel(nn.Module):
                  feat_dim: int,
                  in_edge_channel: int=11,
                  mid_edge_channel: int=128,
+                 n_bins: int=6,
                  mask_rate: float = 0.5,
                  drop_edge_rate: float = 0,
                  ):
-        super(PreModel,self).__init__()
+        super(CLRModel,self).__init__()
 
         self._mask_rate = mask_rate
         self._drop_edge_rate = drop_edge_rate
 
-        self.encoder = DeeperGCN(in_dim, enc_num_hidden, num_layers,1,
+        self.mol_encoder = DeeperGCN(in_dim, enc_num_hidden, num_layers,1,
                                  dropout_ratio=0.1,embedding_layer=None,
                                  graph_conv=SAGEConvV2,
-                                 in_edge_channel=in_edge_channel,
+                                 in_edge_channel=None,
                                  mid_edge_channel=mid_edge_channel,aggr='softmax')
         
-        self.feat_lin = Linear(enc_num_hidden, feat_dim)
+        self.conf_encoder = DeeperGCN(in_edge_channel,mid_edge_channel,num_layers,1,
+                                      dropout_ratio=0.1,embedding_layer=None,
+                                      graph_conv=SAGEConvV2,
+                                      in_edge_channel=n_bins,
+                                      mid_edge_channel=mid_edge_channel, aggr='softmax')
+
+        self.feat_lin = Linear(enc_num_hidden+mid_edge_channel, feat_dim)
 
         self.out_lin = nn.Sequential(
             nn.Linear(feat_dim,feat_dim),
@@ -69,18 +79,32 @@ class PreModel(nn.Module):
         return out_x, (mask_edges, keep_edges)
 
     def forward(self, x):
-        x_batches = x.batch
-        x_i, (x_i_mask_nodes, x_i_keep_nodes) = self.encoding_mask_noise(x.clone(),self._mask_rate)
-        x_i, (x_i_mask_edges, x_i_keep_edges) = self.encoding_edge_noise(x_i, self._mask_rate)
+        mol_g,conf_g = x
+        mol_batches = mol_g.batch
+        conf_batches = conf_g.batch
 
-        x_j, (x_j_mask_nodes, x_j_keep_nodes) = self.encoding_mask_noise(x.clone(),self._mask_rate)
-        x_j, (x_j_mask_edges, x_j_keep_edges) = self.encoding_edge_noise(x_j,self._mask_rate)
+        mol_i, (mol_i_mask_nodes, mol_i_keep_nodes) = self.encoding_mask_noise(mol_g.clone(),self._mask_rate)
+        mol_j, (mol_j_mask_nodes, mol_j_keep_nodes) = self.encoding_mask_noise(mol_g.clone(),self._mask_rate)
 
-        ris,ri_edge_attr = self.encoder(x_i.x, x_i.edge_index, x_i.edge_attr, x_i.batch)
-        rjs,rj_edge_attr = self.encoder(x_j.x, x_j.edge_index, x_j.edge_attr, x_j.batch)
+        conf_i, (conf_i_mask_nodes, conf_i_keep_nodes) = self.encoding_mask_noise(conf_g.clone(),self._mask_rate)
+        conf_j, (conf_j_mask_nodes, conf_j_keep_nodes) = self.encoding_mask_noise(conf_g.clone(),self._mask_rate)
+        conf_i, (conf_i_mask_edges, conf_i_keep_edges) = self.encoding_edge_noise(conf_i,self._mask_rate)
+        conf_j, (conf_j_mask_edges, conf_j_keep_edges) = self.encoding_edge_noise(conf_j,self._mask_rate)
 
-        ris = global_mean_pool(ris,x_batches)
-        rjs = global_mean_pool(rjs,x_batches)
+        mol_ris,mol_ri_edge_attr = self.mol_encoder(mol_i.x, mol_i.edge_index, mol_i.edge_attr, mol_i.batch)
+        mol_rjs,mol_rj_edge_attr = self.mol_encoder(mol_j.x, mol_j.edge_index, mol_j.edge_attr, mol_j.batch)
+
+        conf_ris,conf_ri_edge_attr = self.conf_encoder(conf_i.x, conf_i.edge_index, conf_i.edge_attr, conf_i.batch)
+        conf_rjs,conf_rj_edge_attr = self.conf_encoder(conf_j.x, conf_j.edge_index, conf_j.edge_attr, conf_j.batch)
+
+        mol_ris = global_mean_pool(mol_ris,mol_batches)
+        mol_rjs = global_mean_pool(mol_rjs,mol_batches)
+
+        conf_ris = global_mean_pool(conf_ris,conf_batches)
+        conf_rjs = global_mean_pool(conf_rjs,conf_batches)
+
+        ris = t.cat([mol_ris,conf_ris],dim=-1)
+        rjs = t.cat([mol_rjs,conf_rjs],dim=-1)
 
         ris = self.feat_lin(ris)
         rjs = self.feat_lin(rjs)
@@ -89,7 +113,7 @@ class PreModel(nn.Module):
         rj_out = self.out_lin(rjs)
 
         return ri_out,rj_out
-
+    
 class PreModel_Container(LightningModule):
     def __init__(self,
                 in_dim: int,
@@ -98,6 +122,7 @@ class PreModel_Container(LightningModule):
                 batch_size: int=128,
                 in_edge_channel: int=11,
                 mid_edge_channel: int=128,
+                n_bins: int=6,
                 mask_rate: float = 0.6,
                 drop_edge_rate: float = 0.6,
                 lr: float = 0.001,
@@ -117,16 +142,17 @@ class PreModel_Container(LightningModule):
         self.batch_size = batch_size
         self.in_dim = in_dim + 2
         self.enc_mid_channel = num_hidden
-        self.in_edge_dim = in_edge_channel
+        self.in_edge_dim = in_edge_channel + 2
         self.enc_mid_edge_channel = mid_edge_channel
+        self.n_bins = n_bins
         self.mask_rate = mask_rate
         self.drop_edge_rate = drop_edge_rate
         
         self.loss_func = NTXentLoss(0,self.batch_size,0.1,True)
 
-        self.model = PreModel(self.in_dim,self.enc_mid_channel,self.num_layers,
+        self.model = CLRModel(self.in_dim,self.enc_mid_channel,self.num_layers,
                               self.enc_mid_channel,self.in_edge_dim,self.enc_mid_edge_channel,
-                              self.mask_rate,self.drop_edge_rate)
+                              self.n_bins,self.mask_rate,self.drop_edge_rate)
         
         if self.verbose: print(self.model)
         self.epoch_metrics = Struct(train=[],valid=[],test=[])

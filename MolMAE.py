@@ -65,8 +65,6 @@ class PreModel(nn.Module):
             in_dim: int,
             num_hidden: int,
             num_layers: int,
-            nhead: int,
-            nhead_out: int,
             in_edge_channel: int=11,
             mid_edge_channel: int=128,
             mask_rate: float = 0.3,
@@ -86,18 +84,10 @@ class PreModel(nn.Module):
         
         self._replace_rate = replace_rate
         self._mask_token_rate = 1 - self._replace_rate
-
-        assert num_hidden % nhead == 0
-        assert num_hidden % nhead_out == 0
-        if encoder_type in ("gat", "dotgat"):
-            enc_num_hidden = num_hidden // nhead
-            enc_nhead = nhead
-        else:
-            enc_num_hidden = num_hidden
-            enc_nhead = 1
+        
+        enc_num_hidden = num_hidden
 
         dec_in_dim = num_hidden
-        dec_num_hidden = num_hidden // nhead_out if decoder_type in ("gat", "dotgat") else num_hidden 
 
         # build encoder
         self.encoder = DeeperGCN(in_dim, enc_num_hidden, num_layers,1,
@@ -115,6 +105,7 @@ class PreModel(nn.Module):
 
         self.enc_mask_token = nn.Parameter(torch.zeros(1, in_dim))
         self.enc_edge_token = nn.Parameter(torch.zeros(1,in_edge_channel))
+        
         if concat_hidden:
             self.encoder2decoder_nodes = nn.Linear(dec_in_dim * num_layers, dec_in_dim, bias=False)
             self.encoder2decoder_edges = nn.Linear(mid_edge_channel * num_layers, mid_edge_channel, bias= False)
