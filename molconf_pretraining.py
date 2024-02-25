@@ -3,7 +3,6 @@ from pytorch_lightning import callbacks as pl_callbacks
 from pytorch_lightning import Trainer
 
 from MolConfSSL import PreModel_Container 
-from dataset import Pretraining_Dataset
 from large_dataset import Large_PretrainingDataset
 from utils import * 
 
