@@ -56,7 +56,6 @@ if __name__ == '__main__':
     split_strat = args.split_strategy
     model_type = args.model_type
     gconv_ckpt = args.__dict__.get('gconv_ckpt')
-    cnn_ckpt = args.__dict__.get('cnn_ckpt')
     lin_Eval = args.lin_eval
     n_layers = args.n_layers
 
@@ -106,11 +105,13 @@ if __name__ == '__main__':
                             use_seq = True if entry2_seq_file else False
                             )
 
-    if gconv_ckpt and cnn_ckpt:
+    if gconv_ckpt:
         empty_rgcn = PreModel_Container(119,128,n_layers)
         empty_rgcn.load_from_checkpoint(gconv_ckpt)
         model.model.gconv1.load_state_dict(empty_rgcn.model.gconv.state_dict())
         model.model.gconv1_seq.load_state_dict(empty_rgcn.model.conv.state_dict())
+        model.model.gconv2.load_state_dict(empty_rgcn.model.gconv.state_dict())
+        model.model.gconv2_seq.load_state_dict(empty_rgcn.model.conv.state_dict())
 
     if lin_Eval:
         for param in model.model.gconv1.parameters():

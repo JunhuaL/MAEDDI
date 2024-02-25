@@ -20,7 +20,21 @@ cd /disk/scratch
 
 if [ -d "s1950841" ]; then
     cd s1950841
-    cd dataset/Namiki/drug/
+    if [ -d "dataset" ]; then
+        cd dataset
+        if [ -d "Namiki" ]; then
+            cd Namiki
+        else
+            mkdir Namiki
+            mkdir Namiki/drug/
+            cd Namiki/drug/
+        fi
+    else
+        mkdir dataset
+        mkdir dataset/Namiki/
+        mkdir dataset/Namiki/drug/
+        cd dataset/Namiki/drug/
+    fi
 else
     mkdir s1950841
     mkdir s1950841/dataset
