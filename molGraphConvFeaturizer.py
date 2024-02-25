@@ -332,11 +332,10 @@ class BondGraphFeaturizer(MolecularFeaturizer):
   """ This class is a featurizer for the bonds of a molecule. The nodes are bonds and the edges
   between the nodes describe the geometric relationship between the bonds, e.g angles, adjacency.
   """
-  def __init__(self, use_dihedrals, use_edges, n_confs):
+  def __init__(self, use_edges, n_confs):
     self.n_confs = n_confs
-    self.use_dihedrals = use_dihedrals
     self.use_edges = use_edges
-    self.conf_gen = ConformerGenerator(n_confs,-1,'mmff94s',50)
+    self.conf_gen = ConformerGenerator(n_confs,-1,'uff',50)
   
   def _featurize(self, datapoint: RDKitMol, **kwargs):
     assert datapoint.GetNumAtoms(
@@ -346,45 +345,47 @@ class BondGraphFeaturizer(MolecularFeaturizer):
       raise DeprecationWarning(
           'Mol is being phased out as a parameter, please pass "datapoint" instead.'
       )
-    
+    try:
+      datapoint.GetAtomWithIdx(0).GetProp('_GasteigerCharge')
+    except:
+      # If partial charges were not computed
+      try:
+        from rdkit.Chem import AllChem
+        AllChem.ComputeGasteigerCharges(datapoint)
+      except ModuleNotFoundError:
+        raise ImportError("This class requires RDKit to be installed.")
+      
+    Chem.rdPartialCharges.ComputeGasteigerCharges(datapoint)
     # Generating Conformers
     bonds = datapoint.GetBonds()
     conf_mol = self.conf_gen.generate_conformers(datapoint)
-    confs = conf_mol.GetConformers()
+    conf = conf_mol.GetConformer()
 
     # construct node (bond) features
     bond_features = []
     for bond in bonds:
       features = _construct_bond_feature(bond)
-      bond_lens = np.zeros(self.n_confs)
-      for i in range(len(confs)):
-        bond_lens[i] = rdMolTransforms.GetBondLength(confs[i],bond.GetBeginAtomIdx(),bond.GetEndAtomIdx())
-      features = np.concatenate([features,bond_lens],axis=None)
+      bond_len = rdMolTransforms.GetBondLength(conf,bond.GetBeginAtomIdx(),bond.GetEndAtomIdx())
+      features = np.concatenate([features,bond_len],axis=None)
       bond_features.append(features)
 
     bond_features = np.asarray(bond_features,dtype=float)
 
-    if self.use_dihedrals:
-      pass
-    else:
-      src, dest = [], []
-      edge_features = None
-      angle_features = []
-      for i_idx in range(len(bonds)):
-        for j_idx in range(i_idx+1,len(bonds)):
-          bond_i = [bonds[i_idx].GetBeginAtomIdx(),bonds[i_idx].GetEndAtomIdx()]
-          bond_j = [bonds[j_idx].GetBeginAtomIdx(),bonds[j_idx].GetEndAtomIdx()]
-          
-          if any([atom in bond_j for atom in bond_i]):
-            src += [i_idx,j_idx]
-            dest += [j_idx,i_idx]
-            if self.use_edges:
-              common_atom = list(set(bond_i).intersection(set(bond_j)))
-              end_atoms = list(set(bond_i).symmetric_difference(set(bond_j)))
-              angles = np.zeros(self.n_confs)
-              for i in range(len(confs)):
-                angles[i] = rdMolTransforms.GetAngleRad(confs[i],end_atoms[0],common_atom[0],end_atoms[1])
-              angle_features += 2*[angles]
+    src, dest = [], []
+    edge_features = None
+    angle_features = []
+    for i in range(len(bonds)):
+      for j in range(i+1,len(bonds)):
+        bond_i = [bonds[i].GetBeginAtomIdx(),bonds[i].GetEndAtomIdx()]
+        bond_j = [bonds[j].GetBeginAtomIdx(),bonds[j].GetEndAtomIdx()]
+        common_atom = set(bond_i).intersection(set(bond_j))
+        if common_atom:
+          src += [i,j]
+          dest += [j,i]
+          common_atom = list(common_atom)[0]
+          end_atoms = list(set(bond_i).symmetric_difference(set(bond_j)))
+          angle = rdMolTransforms.GetAngleRad(conf,end_atoms[0],common_atom,end_atoms[1])
+          angle_features += 2*[angle]
 
       edge_features = np.asarray(angle_features, dtype=float)
     return GraphData(node_features=bond_features,

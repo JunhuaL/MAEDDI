@@ -271,13 +271,15 @@ class EntryDataset(InMemoryDataset):
                     default_dim_features=11,default_dim_nodes=40,n_conformers=1):
         from molGraphConvFeaturizer import BondGraphFeaturizer
         from rdkit import Chem
+        from rdkit import RDLogger
+        RDLogger.DisableLog("rdApp.*")
         from tqdm import tqdm
         
         assert np.all(np.in1d(['drugID','SMILES'] , drug_df.columns.values))
         self.entryIDs = drug_df.drugID.values
         mols_list= list(map(Chem.MolFromSmiles, drug_df.SMILES))
 
-        featurizer = BondGraphFeaturizer(use_dihedrals=False,use_edges=True,n_confs=n_conformers)
+        featurizer = BondGraphFeaturizer(use_edges=True,n_confs=n_conformers)
         bondgraph_list = featurizer.featurize(mols_list)
 
         data_list = []

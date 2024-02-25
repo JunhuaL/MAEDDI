@@ -135,6 +135,7 @@ class ConformerGenerator(object):
     param = rdDistGeom.ETKDGv2()
     param.pruneRmsThresh=-1
     param.numThreads=0
+    param.useRandomCoords=True
     rdDistGeom.EmbedMultipleConfs(mol, n_confs, param)
     return mol
 
