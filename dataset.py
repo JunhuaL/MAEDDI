@@ -161,7 +161,7 @@ class EntryDataset(InMemoryDataset):
         none_inds = [i for i,val in enumerate(mols_list) if val == None]
         mols_list = [mol for mol in mols_list if mol]
         self.entryIDs = np.delete(self.entryIDs,none_inds)
-        featurizer = user_MolGraphConvFeaturizer(use_edges=True,use_chirality=True,use_partial_charge=True)
+        featurizer = user_MolGraphConvFeaturizer(use_edges=use_edges,use_chirality=True,use_partial_charge=True)
         deepchem_list = featurizer.featurize(mols_list)
         print("featurize complete")
         data_list = []      
