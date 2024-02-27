@@ -187,7 +187,7 @@ class EntryDataset(InMemoryDataset):
             
             data_list.append(Data(x=t.from_numpy(feat_mat).float(),
                                 edge_index=t.from_numpy(edges).long(),
-                                edge_attr=t.from_numpy(edges_attr).float()))
+                                edge_attr=t.from_numpy(edges_attr).float() if edges_attr is not None else None))
         
         print("reformat complete")
         data,slices = self.collate(data_list)
