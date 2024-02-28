@@ -1,0 +1,17 @@
+dataset:  DrugBank
+task: binary 
+category: DDI
+entry1_file: ./dataset/DrugBank/drug/processed/data.pt
+entry2_file: ./dataset/DrugBank/drug/processed/data.pt
+entry1_seq_file: ./dataset/DrugBank/drug/drug.csv
+pair_file: ./dataset/DrugBank/binary_1vs1/entry_pairs.csv
+label_file: ./dataset/DrugBank/binary_1vs1/pair_labels.csv
+save_folder: ./output/mol_conf/DrugBank/binary_1vs1/all_cluster/
+split_strategy: sample_from_all_clusters
+gconv_ckpt: ./model_checkpoints/molconf_20_layers_4_random/last.ckpt
+lin_eval: False
+model_type: deepdrug
+gpus: 0
+num_out_dim: 1
+n_layers: 4
+n_confs: 1

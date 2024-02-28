@@ -522,7 +522,7 @@ class PairedDataset_v1(t.utils.data.Dataset):#需要继承data.Dataset
 class DeepDrug_Dataset(LightningDataModule):
     def __init__(self,entry1_data_folder,entry2_data_folder,entry_pairs_file,
         pair_labels_file,cv_file=None,cv_fold=0,batch_size=256,task_type='binary', n_confs=0,
-        y_transfrom_func=None,category=None,entry1_seq_file=None, entry2_seq_file = None,
+        y_transfrom_func=None,category=None,entry1_seq_file=None,entry2_seq_file=None,
         split_strat='random'):  
         
         super().__init__()
@@ -542,7 +542,8 @@ class DeepDrug_Dataset(LightningDataModule):
         self.batch_size = batch_size 
         self.y_transfrom_func = y_transfrom_func
         self.split_strat = split_strat
-        self.bond_data_file = f'bond_data_{n_confs}' if n_confs > 0 else None
+        self.atom_file = 'atom' if n_confs > 0 else None
+        self.bond_file = 'conf' if n_confs > 0 else None
 
         self.entry1_seq_len=200
 
@@ -571,21 +572,18 @@ class DeepDrug_Dataset(LightningDataModule):
     def my_prepare_data(self):
         print('preparing dataset...')
         if os.path.isfile(self.entry1_data_folder ):
-
-
             self.entry1_dataset = SeqDataset(self.entry1_data_folder,data_type='drug',max_len=self.entry1_seq_len,onehot=True)
         else:
-            self.entry1_dataset = EntryDataset(root_folder=self.entry1_data_folder,filename='drug_data' if self.bond_data_file else 'data')
+            self.entry1_dataset = EntryDataset(root_folder=self.entry1_data_folder,filename=self.atom_file if self.atom_file else 'data')
             self.entry1_dataset.add_node_degree()
 
             if self.entry1_multi_embed  == True:
                 # first embeding: graph 
                 # second embedding: sequence
                 print('using drug sequences file:',self.entry1_data_folder )
-                if self.bond_data_file:
-                    self.entry1_bond_dataset = EntryDataset(root_folder=self.entry1_data_folder,filename=self.bond_data_file)
-                    self.entry1_seq_dataset = SeqDataset(self.entry1_seq_file,data_type='drug',max_len=self.entry1_seq_len,onehot=True)
-                    self.entry1_dataset = MultiEmbedDataset_v1(self.entry1_dataset,self.entry1_bond_dataset,self.entry1_seq_dataset)
+                if self.bond_file:
+                    self.entry1_bond_dataset = EntryDataset(root_folder=self.entry1_data_folder,filename=self.bond_file)
+                    self.entry1_dataset = MultiEmbedDataset_v1(self.entry1_dataset,self.entry1_bond_dataset)
                 else:
                     self.entry1_seq_dataset = SeqDataset(self.entry1_seq_file,data_type='drug',max_len=self.entry1_seq_len,onehot=True)
                     self.entry1_dataset = MultiEmbedDataset_v1(self.entry1_dataset,self.entry1_seq_dataset)
@@ -597,14 +595,13 @@ class DeepDrug_Dataset(LightningDataModule):
             if os.path.isfile(self.entry2_data_folder ):
                 self.entry2_dataset = SeqDataset(self.entry2_data_folder,data_type=self.entry2_type, max_len=self.entry2_seq_len,onehot=True)
             else:
-                self.entry2_dataset = EntryDataset(root_folder=self.entry2_data_folder,filename='drug_data' if self.bond_data_file else 'data')
+                self.entry2_dataset = EntryDataset(root_folder=self.entry2_data_folder,filename=self.atom_file if self.atom_file else 'data')
                 self.entry2_dataset.add_node_degree()
                     
             if self.entry2_multi_embed  == True:
                 print('using target sequences file:',self.entry2_data_folder )
-                if self.bond_data_file:
-                    self.entry2_bond_dataset = EntryDataset(root_folder=self.entry2_data_folder,filename=self.bond_data_file)
-                    self.entry2_seq_dataset = SeqDataset(self.entry2_seq_file,data_type=self.entry2_type,max_len=self.entry2_seq_len,onehot=True)
+                if self.bond_file:
+                    self.entry2_bond_dataset = EntryDataset(root_folder=self.entry2_data_folder,filename=self.bond_file)
                     self.entry2_dataset = MultiEmbedDataset_v1(self.entry2_dataset,self.entry2_bond_dataset,self.entry2_seq_dataset)
                 else:
                     self.entry2_seq_dataset = SeqDataset(self.entry2_seq_file,data_type=self.entry2_type,max_len=self.entry2_seq_len,onehot=True)

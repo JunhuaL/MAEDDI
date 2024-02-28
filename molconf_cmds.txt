@@ -1,0 +1,4 @@
+python molconf_finetuning.py --configfile=./configs/MolConfConfigs/4_molconf_allcls_lineval.yml
+python molconf_finetuning.py --configfile=./configs/MolConfConfigs/4_molconf_config_allcls.yml
+python molconf_finetuning.py --configfile=./configs/MolConfConfigs/4_molconf_config_onecls.yml
+python molconf_finetuning.py --configfile=./configs/MolConfConfigs/4_molconf_onecls_lineval.yml
