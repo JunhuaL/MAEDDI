@@ -8,7 +8,7 @@ pair_file: ./dataset/DrugBank/binary_1vs1/entry_pairs.csv
 label_file: ./dataset/DrugBank/binary_1vs1/pair_labels.csv
 save_folder: ./output/mol_conf/DrugBank/binary_1vs1/one_cluster/
 split_strategy: whole_cluster_sampling
-gconv_ckpt: ./model_checkpoints/molconf_20_layers_4_random/last.ckpt
+gconv_ckpt: ./model_checkpoints/molconf_epoch_20_layers_4_random/last.ckpt
 lin_eval: False
 model_type: deepdrug
 gpus: 0
