@@ -1,0 +1,41 @@
+Job running on landonia02
+Job started: 25/02/2024 16:48:04
+Setting up bash environment
+Activating conda environment: masters
+Failed to featurize datapoint 1. Appending empty array
+Exception message: Python argument types in
+    rdkit.Chem.rdmolops.AddHs(NoneType)
+did not match C++ signature:
+    AddHs(RDKit::ROMol mol, bool explicitOnly=False, bool addCoords=False, boost::python::api::object onlyOnAtoms=None, bool addResidueInfo=False)
+Failed to featurize datapoint 7. Appending empty array
+Exception message: No conformers generated for molecule.
+Failed to featurize datapoint 33. Appending empty array
+Exception message: Python argument types in
+    rdkit.Chem.rdmolops.AddHs(NoneType)
+did not match C++ signature:
+    AddHs(RDKit::ROMol mol, bool explicitOnly=False, bool addCoords=False, boost::python::api::object onlyOnAtoms=None, bool addResidueInfo=False)
+Failed to featurize datapoint 93. Appending empty array
+Exception message: No conformers generated for molecule.
+Failed to featurize datapoint 112. Appending empty array
+Exception message: No conformers generated for molecule.
+Failed to featurize datapoint 121. Appending empty array
+Exception message: Python argument types in
+    rdkit.Chem.rdmolops.AddHs(NoneType)
+did not match C++ signature:
+    AddHs(RDKit::ROMol mol, bool explicitOnly=False, bool addCoords=False, boost::python::api::object onlyOnAtoms=None, bool addResidueInfo=False)
+Failed to featurize datapoint 125. Appending empty array
+Exception message: Python argument types in
+    rdkit.Chem.rdmolops.AddHs(NoneType)
+did not match C++ signature:
+    AddHs(RDKit::ROMol mol, bool explicitOnly=False, bool addCoords=False, boost::python::api::object onlyOnAtoms=None, bool addResidueInfo=False)
+Failed to featurize datapoint 180. Appending empty array
+Exception message: Python argument types in
+    rdkit.Chem.rdmolops.AddHs(NoneType)
+did not match C++ signature:
+    AddHs(RDKit::ROMol mol, bool explicitOnly=False, bool addCoords=False, boost::python::api::object onlyOnAtoms=None, bool addResidueInfo=False)
+Failed to featurize datapoint 275. Appending empty array
+Exception message: No conformers generated for molecule.
+
+=============
+job finished successfully
+Job finished: 26/02/2024 08:55:19
