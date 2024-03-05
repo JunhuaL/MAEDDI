@@ -561,6 +561,10 @@ class DeepDrug_Dataset(LightningDataModule):
             self.entry2_seq_file = entry2_seq_file
             self.entry1_multi_embed = True 
             self.entry1_seq_file = entry1_seq_file
+        elif n_confs > 0:
+            self.entry1_seq_file = entry1_seq_file
+            self.entry2_multi_embed = True
+            self.entry1_multi_embed = True
         else:
             self.entry1_seq_file = entry1_seq_file
             self.entry1_multi_embed = False
@@ -583,6 +587,7 @@ class DeepDrug_Dataset(LightningDataModule):
                 print('using drug sequences file:',self.entry1_data_folder )
                 if self.bond_file:
                     self.entry1_bond_dataset = EntryDataset(root_folder=self.entry1_data_folder,filename=self.bond_file)
+                    self.entry1_bond_dataset.add_node_degree()
                     self.entry1_dataset = MultiEmbedDataset_v1(self.entry1_dataset,self.entry1_bond_dataset)
                 else:
                     self.entry1_seq_dataset = SeqDataset(self.entry1_seq_file,data_type='drug',max_len=self.entry1_seq_len,onehot=True)
@@ -602,7 +607,8 @@ class DeepDrug_Dataset(LightningDataModule):
                 print('using target sequences file:',self.entry2_data_folder )
                 if self.bond_file:
                     self.entry2_bond_dataset = EntryDataset(root_folder=self.entry2_data_folder,filename=self.bond_file)
-                    self.entry2_dataset = MultiEmbedDataset_v1(self.entry2_dataset,self.entry2_bond_dataset,self.entry2_seq_dataset)
+                    self.entry2_bond_dataset.add_node_degree()
+                    self.entry2_dataset = MultiEmbedDataset_v1(self.entry2_dataset,self.entry2_bond_dataset)
                 else:
                     self.entry2_seq_dataset = SeqDataset(self.entry2_seq_file,data_type=self.entry2_type,max_len=self.entry2_seq_len,onehot=True)
                     self.entry2_dataset = MultiEmbedDataset_v1(self.entry2_dataset,self.entry2_seq_dataset)

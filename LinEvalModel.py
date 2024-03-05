@@ -196,7 +196,7 @@ class DeepDrug_Container(LightningModule):
             self.entry2_num_graph_layer= self.n_layers
             self.entry2_seq_len= 200
             self.entry2_in_channel=  119 + 2 
-            self.entry2_in_edge_channel= 11 if use_conf else 12 + 2
+            self.entry2_in_edge_channel= 12 + 2 if use_conf else 11
             self.siamese_feature_module=True  
 
         if self.task_type in ['multi_classification','multiclass']:
