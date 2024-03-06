@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     model = PreModel_Container(119,128,n_layers,in_edge_channel=12)
 
-    earlystopping_tracking = 'val_loss'
+    earlystopping_tracking = 'trn_loss'
     earlystopping_mode = 'min'
     earlystopping_min_delta = 0.0001
 
