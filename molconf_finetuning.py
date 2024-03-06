@@ -55,7 +55,7 @@ if __name__ == '__main__':
     lin_Eval = args.lin_eval
     n_layers = args.n_layers
     n_confs = args.n_confs
-
+    lr = args.__dict__.get('lr')
     y_transform_func = None
 
     if args.task in ['binary','multiclass','multilabel']:
@@ -98,7 +98,8 @@ if __name__ == '__main__':
                             num_out_dim = num_out_dim, model_type=model_type,
                             n_layers = n_layers,
                             use_seq = True if entry2_seq_file else False,
-                            use_conf = n_confs > 0 
+                            use_conf = n_confs > 0,
+                            lr=lr
                             )
     
     if gconv_ckpt:
@@ -140,7 +141,7 @@ if __name__ == '__main__':
                     check_val_every_n_epoch=1,
                     callbacks=  [checkpoint_callback,
                                 earlystop_callback,],
-                    # enable_progress_bar=False,
+                    enable_progress_bar=False,
                     )
     trainer.fit(model, datamodule=datamodule,)
 

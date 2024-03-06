@@ -383,7 +383,7 @@ class DeepDrug_Container(LightningModule):
 
 
     def configure_optimizers(self):
-        self.my_optimizers =  torch.optim.Adam(filter(lambda p : p.requires_grad, self.parameters()), lr=self.lr)
+        self.my_optimizers =  torch.optim.Adam(filter(lambda p : p.requires_grad, self.parameters()), lr=self.lr, weight_decay= 1e-6)
 
         if self.scheduler_ReduceLROnPlateau_tracking in ['mse',]:
             mode = 'min'
