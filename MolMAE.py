@@ -217,15 +217,6 @@ class PreModel(nn.Module):
         rep = self.encoder(x.x, x.edge_index, x.edge_attr, x.batch)
         return rep
 
-    @property
-    def enc_params(self):
-        return self.encoder.parameters()
-    
-    @property
-    def dec_params(self):
-        return chain(*[self.encoder_to_decoder.parameters(), self.decoder.parameters()])
-    
-
 class PreModel_Container(LightningModule):
     def __init__(self,
                 in_dim: int,

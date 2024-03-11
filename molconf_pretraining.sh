@@ -50,7 +50,7 @@ rsync -rvhz --partial --inplace /home/s1950841/MAEDDI/dataset/Namiki/drug/proces
 cd /disk/scratch/s1950841
 rsync -vhz --partial --inplace /home/s1950841/MAEDDI/*.py .
 
-python molconf_pretraining.py 20 4 random
+python molconf_pretraining.py 20 4 random mae
 
 rsync -rvhz ./model_checkpoints /home/s1950841/MAEDDI/
 

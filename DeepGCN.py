@@ -184,7 +184,6 @@ class SAGEConvV2(MessagePassing):
                  aggr: str = 'mean', t: float = 1.0, learn_t: bool = False,
                  p: float = 1.0, learn_p: bool = False,
                   **kwargs):  # yapf: disable
-        # kwargs.setdefault('aggr', 'mean')
         kwargs.setdefault('aggr', None)
         super(SAGEConvV2, self).__init__(**kwargs)
 
@@ -203,7 +202,6 @@ class SAGEConvV2(MessagePassing):
             else:
                 self.p = p
 
-
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.in_edge_channels = in_edge_channels 
@@ -212,11 +210,9 @@ class SAGEConvV2(MessagePassing):
 
         if isinstance(in_channels, int):
             in_channels = (in_channels, in_channels)
-
         
         if self.root_weight:
             self.lin_r = Linear(in_channels[1], out_channels, bias=False)
-
         
         if in_edge_channels is not None:
             self.lin_l = nn.Sequential(
@@ -229,18 +225,13 @@ class SAGEConvV2(MessagePassing):
                                         nn.Linear(in_channels[0]*2 , in_channels[0]*2 , bias=bias),
                                         nn.ReLU(),
                                         nn.Linear(in_channels[0]*2 , out_channels, bias=bias),
-                        )
-        # self.reset_parameters()
+                                        )
 
     def reset_parameters(self,):
-        # self.lin_l.reset_parameters()
         self.lin_l.apply(init_linear)
 
         if self.root_weight:
             self.lin_r.reset_parameters()
-
-        # if self.in_edge_channels is not None:
-        #     self.edge_lin.reset_parameters()
 
         if self.aggr in ['softmax', 'softmax_sg', 'power',]:
             if self.t and isinstance(self.t, Tensor):
@@ -256,6 +247,7 @@ class SAGEConvV2(MessagePassing):
             x = t.cat([x_i,x_j,edge_attr],dim=-1)
         x  = self.lin_l(x)
         return x
+    
     def aggregate(self, inputs: Tensor, index: Tensor,
                   dim_size: Optional[int] = None) -> Tensor:
 
@@ -298,7 +290,22 @@ class SAGEConvV2(MessagePassing):
 
         if self.normalize:
             out = F.normalize(out, p=2., dim=-1)
-        return out,edge_attr 
+        return out,edge_attr
+    
+class GINConv(MessagePassing):
+    def __init__(self, in_channels: Union[int, Tuple[int, int]],
+                 out_channels: int, normalize: bool = False,
+                 in_edge_channels: Union[int, Tuple[int, int],None] = None ,
+                 aggr: str = 'mean', eps: float = 0., train_eps: bool = False,
+                  **kwargs):
+        super(GINConv).__init__(**kwargs)
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.in_edge_channels = in_edge_channels 
+        self.normalize = normalize
+    
+    def message(self, x_i: Tensor,x_j: Tensor,edge_attr: OptTensor):
+        pass
 
 class DeeperGCN(nn.Module):
     def __init__(self, in_channel,mid_channel, num_layers,num_blocks = 1, dropout_ratio=0.1,embedding_layer=None,graph_conv=SAGEConvV2,
