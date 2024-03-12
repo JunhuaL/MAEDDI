@@ -103,7 +103,9 @@ if __name__ == '__main__':
                             )
     
     if gconv_ckpt:
-        empty_rgcn = PreModel_Container(119,128,n_layers,in_edge_channel=12)
+        model_type = 'mae' if 'mae' in gconv_ckpt else 'clr'
+        loss_func = 'mse' if model_type == 'mae' else 'ntxent'
+        empty_rgcn = PreModel_Container(119,128,n_layers,in_edge_channel=12,ssl_framework=model_type,scheduler_ReduceLROnPlateau_tracking=loss_func)
         empty_rgcn.load_from_checkpoint(gconv_ckpt)
         model.model.gconv1.load_state_dict(empty_rgcn.model.mol_encoder.state_dict())
         model.model.gconv1_conf.load_state_dict(empty_rgcn.model.conf_encoder.state_dict())
