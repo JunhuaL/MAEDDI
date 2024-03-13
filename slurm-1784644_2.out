@@ -1,0 +1,252 @@
+Job running on landonia02
+Job started: 07/03/2024 12:23:01
+Setting up bash environment
+Activating conda environment: masters
+Running provided command: python molconf_finetuning.py --configfile=./configs/MolConfConfigs/4_molconf_config_onecls.yml
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+[12:25:19] SMILES Parse Error: syntax error while parsing: OC1=CC=CC(=C1)C-1=C2\CCC(=N2)\C(=C2/N\C(\C=C2)=C(/C2=N/C(/C=C2)=C(\C2=CC=C\-1N2)C1=CC(O)=CC=C1)C1=CC(O)=CC=C1)\C1=CC(O)=CC=C1
+[12:25:19] SMILES Parse Error: Failed parsing SMILES 'OC1=CC=CC(=C1)C-1=C2\CCC(=N2)\C(=C2/N\C(\C=C2)=C(/C2=N/C(/C=C2)=C(\C2=CC=C\-1N2)C1=CC(O)=CC=C1)C1=CC(O)=CC=C1)\C1=CC(O)=CC=C1' for input: 'OC1=CC=CC(=C1)C-1=C2\CCC(=N2)\C(=C2/N\C(\C=C2)=C(/C2=N/C(/C=C2)=C(\C2=CC=C\-1N2)C1=CC(O)=CC=C1)C1=CC(O)=CC=C1)\C1=CC(O)=CC=C1'
+[12:25:19] Explicit valence for atom # 0 N, 4, is greater than permitted
+[12:25:19] Explicit valence for atom # 0 N, 4, is greater than permitted
+[12:25:19] Explicit valence for atom # 0 N, 4, is greater than permitted
+[12:25:19] Explicit valence for atom # 0 N, 4, is greater than permitted
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+
+  | Name  | Type     | Params
+-----------------------------------
+0 | model | DeepDrug | 1.1 M 
+-----------------------------------
+1.1 M     Trainable params
+0         Non-trainable params
+1.1 M     Total params
+4.576     Total estimated model params size (MB)
+Namespace(configfile='./configs/MolConfConfigs/4_molconf_config_onecls.yml')
+{'dataset': 'DrugBank', 'task': 'binary', 'category': 'DDI', 'entry1_file': './dataset/DrugBank/drug/processed/data.pt', 'entry2_file': './dataset/DrugBank/drug/processed/data.pt', 'entry1_seq_file': './dataset/DrugBank/drug/drug.csv', 'pair_file': './dataset/DrugBank/binary_1vs1/entry_pairs.csv', 'label_file': './dataset/DrugBank/binary_1vs1/pair_labels.csv', 'save_folder': './output/mol_conf/DrugBank/binary_1vs1/one_cluster/', 'split_strategy': 'whole_cluster_sampling', 'gconv_ckpt': './model_checkpoints/molconf_epoch_20_layers_4_random/last.ckpt', 'lin_eval': False, 'model_type': 'deepdrug', 'gpus': 0, 'num_out_dim': 1, 'n_layers': 4, 'n_confs': 1, 'lr': 1e-05}
+print parameters:
+{
+  "earlystopping_tracking": "val_epoch_F1",
+  "entry1_data_folder": "./dataset/DrugBank/drug",
+  "entry1_seq_file": "./dataset/DrugBank/drug/drug.csv",
+  "entry2_data_folder": "./dataset/DrugBank/drug",
+  "entry2_seq_file": null,
+  "entry_pairs_file": "./dataset/DrugBank/binary_1vs1/entry_pairs.csv",
+  "gpus": 0,
+  "model_type": "deepdrug",
+  "pair_labels_file": "./dataset/DrugBank/binary_1vs1/pair_labels.csv",
+  "save_folder": "./output/mol_conf/DrugBank/binary_1vs1/one_cluster/",
+  "scheduler_ReduceLROnPlateau_tracking": "F1",
+  "split_strat": "whole_cluster_sampling",
+  "task_type": "binary",
+  "y_pred_file": "./output/mol_conf/DrugBank/binary_1vs1/one_cluster/test_pred.csv",
+  "y_transfrom_func": null,
+  "y_true_file": "./output/mol_conf/DrugBank/binary_1vs1/one_cluster/test_true.csv"
+}
+DeepDrug(
+  (gconv1): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+  )
+  (gconv1_conf): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=14, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=6, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (gconv2_conf): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=14, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=6, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (gconv2): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+  )
+  (global_fc_nn): Sequential(
+    (0): Linear(in_features=512, out_features=128, bias=True)
+    (1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): Dropout(p=0.2, inplace=False)
+    (3): ReLU()
+    (4): Linear(in_features=128, out_features=32, bias=True)
+    (5): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): Dropout(p=0.2, inplace=False)
+    (7): ReLU()
+  )
+  (fc2): Linear(in_features=32, out_features=1, bias=True)
+)
+CLRModel(
+  (mol_encoder): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+  )
+  (conf_encoder): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=14, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=6, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (feat_lin): Linear(in_features=256, out_features=128, bias=True)
+  (out_lin): Sequential(
+    (0): Linear(in_features=128, out_features=128, bias=True)
+    (1): ReLU(inplace=True)
+    (2): Linear(in_features=128, out_features=64, bias=True)
+  )
+)
+CLRModel(
+  (mol_encoder): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+  )
+  (conf_encoder): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=14, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=6, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (feat_lin): Linear(in_features=256, out_features=128, bias=True)
+  (out_lin): Sequential(
+    (0): Linear(in_features=128, out_features=128, bias=True)
+    (1): ReLU(inplace=True)
+    (2): Linear(in_features=128, out_features=64, bias=True)
+  )
+)
+preparing dataset...
+loading processed data...
+add degrees as node features for each sample...
+using drug sequences file: ./dataset/DrugBank/drug
+loading processed data...
+add degrees as node features for each sample...
+the order of entryIDs are not the same in dataset 1 & 2 .
+checking entryIDs finished for MultiEmbedDataset_v1.
+loading processed data...
+add degrees as node features for each sample...
+using target sequences file: ./dataset/DrugBank/drug
+loading processed data...
+add degrees as node features for each sample...
+the order of entryIDs are not the same in dataset 1 & 2 .
+checking entryIDs finished for MultiEmbedDataset_v1.
+can not find cv_file,  whole_cluster_sampling ...
+0.697493479278888
+0.0
+0.30250652072111195
+in val dataloader...
+in train dataloader...
+Traceback (most recent call last):
+  File "molconf_finetuning.py", line 146, in <module>
+    trainer.fit(model, datamodule=datamodule,)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 582, in fit
+    call._call_and_handle_interrupt(
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/call.py", line 38, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 624, in _fit_impl
+    self._run(model, ckpt_path=self.ckpt_path)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1061, in _run
+    results = self._run_stage()
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1140, in _run_stage
+    self._run_train()
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1163, in _run_train
+    self.fit_loop.run()
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/loops/loop.py", line 200, in run
+    self.on_advance_end()
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/loops/fit_loop.py", line 295, in on_advance_end
+    self.trainer._call_callback_hooks("on_train_epoch_end")
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1343, in _call_callback_hooks
+    fn(self, self.lightning_module, *args, **kwargs)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/callbacks/early_stopping.py", line 185, in on_train_epoch_end
+    self._run_early_stopping_check(trainer)
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/callbacks/early_stopping.py", line 196, in _run_early_stopping_check
+    if trainer.fast_dev_run or not self._validate_condition_metric(  # disable early_stopping with fast_dev_run
+  File "/home/s1950841/.conda/envs/masters/lib/python3.8/site-packages/pytorch_lightning/callbacks/early_stopping.py", line 151, in _validate_condition_metric
+    raise RuntimeError(error_msg)
+RuntimeError: Early stopping conditioned on metric `val_epoch_F1` which is not available. Pass in or modify your `EarlyStopping` callback to use any of the following: `lr`, `train_loss`
