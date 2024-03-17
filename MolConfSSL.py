@@ -26,6 +26,98 @@ class My_MSE_Loss(nn.Module):
         edge_loss = self.edge_loss(y_out_edge,y_edge)
         return node_loss + edge_loss
 
+class MolConfModel(nn.Module):
+    def __init__(self, 
+                 in_dim: int, 
+                 enc_num_hidden: int, 
+                 num_layers: int,
+                 feat_dim: int,
+                 in_edge_channel: int=11,
+                 mid_edge_channel: int=128,
+                 n_bins: int=6,
+                 mask_rate: float = 0.5,
+                 drop_edge_rate: float = 0,
+                 ):
+        super(MolConfModel,self).__init__()
+
+        self._mask_rate = mask_rate
+        self._drop_edge_rate = drop_edge_rate
+
+        self.mol_encoder = DeeperGCN(in_dim, enc_num_hidden, num_layers,1,
+                                 dropout_ratio=0.1,embedding_layer=None,
+                                 graph_conv=SAGEConvV2,
+                                 in_edge_channel=None,
+                                 mid_edge_channel=mid_edge_channel,aggr='softmax')
+        
+        self.conf_encoder = DeeperGCN(in_edge_channel,mid_edge_channel,num_layers,1,
+                                      dropout_ratio=0.1,embedding_layer=None,
+                                      graph_conv=SAGEConvV2,
+                                      in_edge_channel=n_bins,
+                                      mid_edge_channel=mid_edge_channel, aggr='softmax')
+
+        self.mol_lin = Linear(enc_num_hidden, feat_dim)
+        self.conf_lin = Linear(mid_edge_channel,feat_dim)
+
+
+        self.out_lin = nn.Sequential(
+            nn.Linear(feat_dim,feat_dim),
+            nn.ReLU(inplace=True),
+            nn.Linear(feat_dim,feat_dim//2)
+        )
+
+    def encoding_mask_noise(self, x, mask_rate=0.3):
+        num_nodes = x.num_nodes
+        perm = t.randperm(num_nodes)
+        num_mask_nodes = int(mask_rate * num_nodes)
+
+        # random masking
+        num_mask_nodes = int(mask_rate * num_nodes)
+        mask_nodes = perm[: num_mask_nodes]
+        keep_nodes = perm[num_mask_nodes: ]
+
+        out_x = x.clone()
+        out_x.x[mask_nodes] = 0.0
+
+        return out_x, (mask_nodes, keep_nodes)
+
+    def encoding_edge_noise(self, x, mask_rate = 0.3):
+        num_edges = x.num_edges
+        perm = t.randperm(num_edges)
+        num_mask_edges = int(mask_rate * num_edges)
+
+        mask_edges = perm[: num_mask_edges]
+        keep_edges = perm[num_mask_edges:]
+        
+        out_x = x.clone()
+        out_x.edge_attr[mask_edges] = 0.0
+
+        return out_x, (mask_edges, keep_edges)
+
+    def forward(self, x):
+        mol_g,conf_g = x
+        mol_batches = mol_g.batch
+        conf_batches = conf_g.batch
+
+        mol_i, (mol_i_mask_nodes, mol_i_keep_nodes) = self.encoding_mask_noise(mol_g.clone(),self._mask_rate)
+
+        conf_i, (conf_i_mask_nodes, conf_i_keep_nodes) = self.encoding_mask_noise(conf_g.clone(),self._mask_rate)
+        conf_i, (conf_i_mask_edges, conf_i_keep_edges) = self.encoding_edge_noise(conf_i,self._mask_rate)
+
+        mol_ris,mol_ri_edge_attr = self.mol_encoder(mol_i.x, mol_i.edge_index, mol_i.edge_attr, mol_i.batch)
+        conf_ris,conf_ri_edge_attr = self.conf_encoder(conf_i.x, conf_i.edge_index, conf_i.edge_attr, conf_i.batch)
+
+        mol_ris = global_mean_pool(mol_ris,mol_batches)
+        conf_ris = global_mean_pool(conf_ris,conf_batches)
+
+        ris = self.mol_lin(mol_ris)
+        rjs = self.conf_lin(conf_ris)
+
+        ri_out = self.out_lin(ris)
+        rj_out = self.out_lin(rjs)
+
+        return ri_out,rj_out
+
+
 class CLRModel(nn.Module):
     def __init__(self, 
                  in_dim: int, 
@@ -264,6 +356,10 @@ class PreModel_Container(LightningModule):
             self.model = MAEModel(self.in_dim,self.enc_mid_channel,self.num_layers,
                                   self.in_edge_dim,self.enc_mid_edge_channel,self.n_bins,
                                   self.mask_rate,self.drop_edge_rate)
+        elif ssl_framework == "molconf":
+            self.model = MolConfModel(self.in_dim,self.enc_mid_channel,self.num_layers,
+                              self.enc_mid_channel,self.in_edge_dim,self.enc_mid_edge_channel,
+                              self.n_bins,self.mask_rate,self.drop_edge_rate)
         else:
             self.model = CLRModel(self.in_dim,self.enc_mid_channel,self.num_layers,
                               self.enc_mid_channel,self.in_edge_dim,self.enc_mid_edge_channel,
@@ -283,6 +379,9 @@ class PreModel_Container(LightningModule):
             y_conf=y_conf.clone()
             mol_x,conf_x,conf_edge = self(batch)
             loss = F.mse_loss(mol_x,y_mol.x) + self.loss_func((conf_x,conf_edge),(y_conf.x,y_conf.edge_attr))
+        elif self.ssl_framework == "molconf":
+            mol_embeds, conf_embeds = self(batch)
+            loss = self.loss_func(mol_embeds,conf_embeds)
         else:
             zis, zjs = self(batch)
             loss = self.loss_func(zis,zjs)
@@ -301,6 +400,9 @@ class PreModel_Container(LightningModule):
             y_conf=y_conf.clone()
             mol_x,conf_x,conf_edge = self(batch)
             loss = F.mse_loss(mol_x,y_mol.x) + self.loss_func((conf_x,conf_edge),(y_conf.x,y_conf.edge_attr))
+        elif self.ssl_framework == "molconf":
+            mol_embeds, conf_embeds = self(batch)
+            loss = self.loss_func(mol_embeds,conf_embeds)
         else:
             zis, zjs = self(batch)
             loss = self.loss_func(zis,zjs)
@@ -317,6 +419,9 @@ class PreModel_Container(LightningModule):
             y_conf=y_conf.clone()
             mol_x,conf_x,conf_edge = self(batch)
             loss = F.mse_loss(mol_x,y_mol.x) + self.loss_func((conf_x,conf_edge),(y_conf.x,y_conf.edge_attr))
+        elif self.ssl_framework == "molconf":
+            mol_embeds, conf_embeds = self(batch)
+            loss = self.loss_func(mol_embeds,conf_embeds)
         else:
             zis, zjs = self(batch)
             loss = self.loss_func(zis,zjs)
@@ -397,7 +502,6 @@ class PreModel_Container(LightningModule):
         self.my_optimizers = t.optim.Adam(self.parameters(), lr=self.lr)
         
         mode = 'min'
-
         self.my_schedulers = t.optim.lr_scheduler.ReduceLROnPlateau(self.my_optimizers,
                                                                     mode= mode,
                                                                     factor= 0.1, patience=8, verbose=True,
