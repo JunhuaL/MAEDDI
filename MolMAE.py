@@ -68,8 +68,6 @@ class PreModel(nn.Module):
             in_edge_channel: int=11,
             mid_edge_channel: int=128,
             mask_rate: float = 0.3,
-            encoder_type: str = "gat",
-            decoder_type: str = "gat",
             drop_edge_rate: float = 0.0,
             replace_rate: float = 0.1,
             concat_hidden: bool = False,
@@ -77,8 +75,6 @@ class PreModel(nn.Module):
          ):
         super(PreModel, self).__init__()
         self._mask_rate = mask_rate
-        self._encoder_type = encoder_type
-        self._decoder_type = decoder_type
         self._drop_edge_rate = drop_edge_rate
         self._output_hidden_size = num_hidden
         self._concat_hidden = concat_hidden
@@ -223,13 +219,9 @@ class PreModel_Container(LightningModule):
                 in_dim: int,
                 num_hidden: int,
                 num_layers: int,
-                nhead: int,
-                nhead_out: int,
                 in_edge_channel: int=11,
                 mid_edge_channel: int=128,
                 mask_rate: float = 0.6,
-                encoder_type: str = "gat",
-                decoder_type: str = "gat",
                 loss_fn: str = "mse",
                 drop_edge_rate: float = 0.6,
                 replace_rate: float = 0.1,
@@ -239,7 +231,7 @@ class PreModel_Container(LightningModule):
                 verbose: bool = True,
                 my_logging: bool = False,
                 scheduler_ReduceLROnPlateau_tracking: str = 'mse',
-                graph_conv: MessagePassing = SAGEConvV2
+                graph_conv: MessagePassing = SAGEConvV2,
                 ):
         super().__init__()
         self.save_hyperparameters()
@@ -252,13 +244,9 @@ class PreModel_Container(LightningModule):
         self.num_layers = num_layers
         self.in_dim = in_dim + 2
         self.enc_mid_channel = num_hidden
-        self.nhead = nhead
-        self.nhead_out = nhead_out
         self.in_edge_dim = in_edge_channel
         self.enc_mid_edge_channel = mid_edge_channel
         self.mask_rate = mask_rate
-        self.encoder_type = encoder_type
-        self.decoder_type = decoder_type
         
         self.drop_edge_rate = drop_edge_rate
         self.replace_rate = replace_rate
@@ -268,10 +256,10 @@ class PreModel_Container(LightningModule):
         if loss_fn == 'mse':
             self.loss_func = My_MSE_Loss()
 
-        self.model = PreModel(self.in_dim,self.enc_mid_channel,self.num_layers,self.nhead,
-                              self.nhead_out,self.in_edge_dim,self.enc_mid_edge_channel,self.mask_rate,
-                              self.encoder_type,self.decoder_type,self.drop_edge_rate,self.replace_rate
-                              ,self.concat_hidden,graph_conv=graph_conv)
+        self.model = PreModel(self.in_dim,self.enc_mid_channel,self.num_layers,
+                              self.in_edge_dim,self.enc_mid_edge_channel,self.mask_rate,
+                              self.drop_edge_rate,self.replace_rate,
+                              self.concat_hidden,graph_conv)
         
         if self.verbose: print(self.model,)
         self.epoch_metrics = Struct(train=[],valid=[],test=[])  

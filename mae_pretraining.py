@@ -22,14 +22,14 @@ if __name__ == '__main__':
         gconv = RGINConv
     else:
         raise "Unsupported GNN unit"
-
-    model = PreModel_Container(119,128,n_layers,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse',graph_conv=gconv)
+    
+    model = PreModel_Container(119,128,n_layers,4,2,loss_fn='mse',graph_conv=gconv)
 
     earlystopping_tracking = 'trn_loss'
     earlystopping_mode = 'min'
     earlystopping_min_delta = 0.0001
 
-    save_model_folder = f'./model_checkpoints/mae_epoch_{gconv}_{n_epochs}_layers_{n_layers}_{split_strat}/'
+    save_model_folder = f'./model_checkpoints/mae_epoch_{str(sys.argv[4])}_{n_epochs}_layers_{n_layers}_{split_strat}/'
 
     checkpoint_callback = pl_callbacks.ModelCheckpoint(dirpath=save_model_folder,
                                         mode = earlystopping_mode,
