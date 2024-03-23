@@ -37,6 +37,7 @@ class MolConfModel(nn.Module):
                  n_bins: int=6,
                  mask_rate: float = 0.5,
                  drop_edge_rate: float = 0,
+                 graph_conv: MessagePassing = SAGEConvV2
                  ):
         super(MolConfModel,self).__init__()
 
@@ -45,13 +46,13 @@ class MolConfModel(nn.Module):
 
         self.mol_encoder = DeeperGCN(in_dim, enc_num_hidden, num_layers,1,
                                  dropout_ratio=0.1,embedding_layer=None,
-                                 graph_conv=SAGEConvV2,
-                                 in_edge_channel=None,
+                                 graph_conv=graph_conv,
+                                 in_edge_channel=in_edge_channel-2,
                                  mid_edge_channel=mid_edge_channel,aggr='softmax')
         
-        self.conf_encoder = DeeperGCN(in_edge_channel,mid_edge_channel,num_layers,1,
+        self.conf_encoder = DeeperGCN(in_edge_channel+1,mid_edge_channel,num_layers,1,
                                       dropout_ratio=0.1,embedding_layer=None,
-                                      graph_conv=SAGEConvV2,
+                                      graph_conv=graph_conv,
                                       in_edge_channel=n_bins,
                                       mid_edge_channel=mid_edge_channel, aggr='softmax')
 
@@ -324,7 +325,8 @@ class PreModel_Container(LightningModule):
                 verbose: bool = True,
                 my_logging: bool = False,
                 scheduler_ReduceLROnPlateau_tracking: str = 'ntxent',
-                ssl_framework = 'clr'
+                ssl_framework = 'clr',
+                graph_conv: MessagePassing = SAGEConvV2,
                  ):
         super().__init__()
         self.save_hyperparameters()
@@ -359,7 +361,7 @@ class PreModel_Container(LightningModule):
         elif ssl_framework == "molconf":
             self.model = MolConfModel(self.in_dim,self.enc_mid_channel,self.num_layers,
                               self.enc_mid_channel,self.in_edge_dim,self.enc_mid_edge_channel,
-                              self.n_bins,self.mask_rate,self.drop_edge_rate)
+                              self.n_bins,self.mask_rate,self.drop_edge_rate, graph_conv=graph_conv)
         else:
             self.model = CLRModel(self.in_dim,self.enc_mid_channel,self.num_layers,
                               self.enc_mid_channel,self.in_edge_dim,self.enc_mid_edge_channel,

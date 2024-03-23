@@ -20,6 +20,7 @@ class PreModel(nn.Module):
                  mid_edge_channel: int=128,
                  mask_rate: float = 0.5,
                  drop_edge_rate: float = 0,
+                 graph_conv: MessagePassing = SAGEConvV2
                  ):
         super(PreModel,self).__init__()
 
@@ -28,7 +29,7 @@ class PreModel(nn.Module):
 
         self.encoder = DeeperGCN(in_dim, enc_num_hidden, num_layers,1,
                                  dropout_ratio=0.1,embedding_layer=None,
-                                 graph_conv=SAGEConvV2,
+                                 graph_conv=graph_conv,
                                  in_edge_channel=in_edge_channel,
                                  mid_edge_channel=mid_edge_channel,aggr='softmax')
         
@@ -103,7 +104,8 @@ class PreModel_Container(LightningModule):
                 lr: float = 0.001,
                 verbose: bool = True,
                 my_logging: bool = False,
-                scheduler_ReduceLROnPlateau_tracking: str = 'ntxent'
+                scheduler_ReduceLROnPlateau_tracking: str = 'ntxent',
+                graph_conv: MessagePassing = SAGEConvV2, 
                  ):
         super().__init__()
         self.save_hyperparameters()
@@ -126,7 +128,7 @@ class PreModel_Container(LightningModule):
 
         self.model = PreModel(self.in_dim,self.enc_mid_channel,self.num_layers,
                               self.enc_mid_channel,self.in_edge_dim,self.enc_mid_edge_channel,
-                              self.mask_rate,self.drop_edge_rate)
+                              self.mask_rate,self.drop_edge_rate,graph_conv=graph_conv)
         
         if self.verbose: print(self.model)
         self.epoch_metrics = Struct(train=[],valid=[],test=[])

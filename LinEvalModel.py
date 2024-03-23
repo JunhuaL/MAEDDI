@@ -79,8 +79,8 @@ class DeepDrug(nn.Module):
         else:
             self.gconv1 = DeeperGCN(in_dim, enc_num_hidden, num_layers,1,
                                     dropout_ratio=0.1,embedding_layer=None,
-                                    graph_conv=SAGEConvV2,
-                                    in_edge_channel=in_edge_channel,
+                                    graph_conv=RGINConv,
+                                    in_edge_channel=None if not use_seq else in_edge_channel,
                                     mid_edge_channel=mid_edge_channel,aggr='softmax')
             dim_gconv1_out = enc_num_hidden
         

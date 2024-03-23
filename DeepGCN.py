@@ -292,20 +292,72 @@ class SAGEConvV2(MessagePassing):
             out = F.normalize(out, p=2., dim=-1)
         return out,edge_attr
     
-class GINConv(MessagePassing):
+class RGINConv(MessagePassing):
     def __init__(self, in_channels: Union[int, Tuple[int, int]],
                  out_channels: int, normalize: bool = False,
-                 in_edge_channels: Union[int, Tuple[int, int],None] = None ,
-                 aggr: str = 'mean', eps: float = 0., train_eps: bool = False,
+                 in_edge_channels: Union[int, Tuple[int, int],None] = None,
+                 bias:bool = True,
+                 eps: float = 1e-7, learn_eps: bool = False,
                   **kwargs):
-        super(GINConv).__init__(**kwargs)
+        super(RGINConv, self).__init__(**kwargs)
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.in_edge_channels = in_edge_channels 
         self.normalize = normalize
+
+        if learn_eps:
+            self.eps = Parameter(torch.Tensor([eps]),requires_grad=True)
+        else:
+            self.eps = eps
+
+        if isinstance(in_channels, int):
+            in_channels = (in_channels, in_channels)
+        
+        self.nn = nn.Sequential(
+                                 nn.Linear(in_channels[0], in_channels[0], bias=bias),
+                                 nn.ReLU(),
+                                 nn.Linear(in_channels[0], out_channels, bias=bias)
+                                )
+        
+        if in_edge_channels is not None:
+            self.lin_l = nn.Sequential(
+                                        nn.Linear(in_channels[0] + in_edge_channels, in_channels[0] , bias=bias),
+                                        nn.ReLU(),
+                                        nn.Linear(in_channels[0] , out_channels, bias=bias),
+                                        )   
+        else:
+            self.lin_l = nn.Sequential(
+                                        nn.Linear(in_channels[0] , in_channels[0] , bias=bias),
+                                        nn.ReLU(),
+                                        nn.Linear(in_channels[0] , out_channels, bias=bias),
+                                        )
+
+    def reset_parameters(self,):
+        self.lin_l.apply(init_linear)
+        self.nn.apply(init_linear)
     
-    def message(self, x_i: Tensor,x_j: Tensor,edge_attr: OptTensor):
-        pass
+    def message(self, x_j: Tensor, edge_attr: OptTensor) -> Tensor:
+        if edge_attr is None:
+            x = x_j
+        else:
+            x = t.cat([x_j,edge_attr],dim=-1)
+        x  = self.lin_l(x)
+        return x
+    
+    def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj, 
+                edge_attr: OptTensor = None,
+                size: Size = None) -> Tensor:
+
+        if isinstance(x,Tensor):
+            x = (x, x)
+        
+        out = self.propagate(edge_index=edge_index, x=x, edge_attr = edge_attr, size=size)
+
+        x_r = x[1]
+        if x_r is not None:
+            out += (1+self.eps) * x_r
+        
+        return self.nn(out),edge_attr
 
 class DeeperGCN(nn.Module):
     def __init__(self, in_channel,mid_channel, num_layers,num_blocks = 1, dropout_ratio=0.1,embedding_layer=None,graph_conv=SAGEConvV2,
@@ -321,6 +373,11 @@ class DeeperGCN(nn.Module):
                 graph_para_dict = {'in_edge_channels':mid_edge_channel,'aggr':aggr}
             use_edge_encoder = True 
             self.update_attr = True 
+        elif graph_conv in [RGINConv,]:
+            graph_para_dict = {'in_edge_channels': mid_edge_channel,
+                               'eps': 1.0, 'learn_eps': True,}
+            use_edge_encoder = True
+            self.update_attr = True
         else:
             raise 
 

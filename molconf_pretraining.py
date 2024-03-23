@@ -3,6 +3,7 @@ from pytorch_lightning import callbacks as pl_callbacks
 from pytorch_lightning import Trainer
 
 from MolConfSSL import PreModel_Container 
+from DeepGCN import SAGEConvV2,RGINConv
 from large_dataset import Large_PretrainingDataset
 from utils import * 
 
@@ -12,11 +13,19 @@ if __name__ == '__main__':
     n_layers = int(sys.argv[2])
     split_strat = str(sys.argv[3])
     model_type = str(sys.argv[4])
+    gconv = str(sys.argv[5])
     save_folder = './dataset/Namiki/drug/'
     datamodule = Large_PretrainingDataset(save_folder,use_conf=True)
 
+    if gconv == 'RGCN':
+        gconv = SAGEConvV2
+    elif gconv == 'RGIN':
+        gconv = RGINConv
+    else:
+        raise "Unsupported GNN unit"
+
     loss_func = 'mse' if model_type == 'mae' else 'ntxent'
-    model = PreModel_Container(119,128,n_layers,in_edge_channel=12,ssl_framework=model_type,scheduler_ReduceLROnPlateau_tracking=loss_func)
+    model = PreModel_Container(119,128,n_layers,in_edge_channel=11,ssl_framework=model_type,scheduler_ReduceLROnPlateau_tracking=loss_func)
 
     earlystopping_tracking = 'trn_loss'
     earlystopping_mode = 'min'

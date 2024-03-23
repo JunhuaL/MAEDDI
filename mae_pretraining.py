@@ -1,13 +1,9 @@
 import sys
-import numpy as np
-import pandas as pd
-import torch as t 
-from torch import Tensor
 from pytorch_lightning import callbacks as pl_callbacks
 from pytorch_lightning import Trainer
 
-from MolMAE import PreModel_Container 
-from dataset import Pretraining_Dataset
+from MolMAE import PreModel_Container
+from DeepGCN import SAGEConvV2, RGINConv
 from large_dataset import Large_PretrainingDataset
 from utils import * 
 
@@ -16,10 +12,18 @@ if __name__ == '__main__':
     n_epochs = int(sys.argv[1])
     n_layers = int(sys.argv[2])
     split_strat = str(sys.argv[3])
-    save_folder = './dataset/Chemberta/drug/processed/'
+    gconv = str(sys.argv[4])
+    save_folder = './dataset/Namiki/drug/processed/'
     datamodule = Large_PretrainingDataset(save_folder)
 
-    model = PreModel_Container(119,128,n_layers,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
+    if gconv == 'RGCN':
+        gconv = SAGEConvV2
+    elif gconv == 'RGIN':
+        gconv = RGINConv
+    else:
+        raise "Unsupported GNN unit"
+
+    model = PreModel_Container(119,128,n_layers,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse',graph_conv=gconv)
 
     earlystopping_tracking = 'val_loss'
     earlystopping_mode = 'min'

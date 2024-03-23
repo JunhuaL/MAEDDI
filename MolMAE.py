@@ -73,6 +73,7 @@ class PreModel(nn.Module):
             drop_edge_rate: float = 0.0,
             replace_rate: float = 0.1,
             concat_hidden: bool = False,
+            graph_conv: MessagePassing = SAGEConvV2
          ):
         super(PreModel, self).__init__()
         self._mask_rate = mask_rate
@@ -92,14 +93,14 @@ class PreModel(nn.Module):
         # build encoder
         self.encoder = DeeperGCN(in_dim, enc_num_hidden, num_layers,1,
                                  dropout_ratio=0.1,embedding_layer=None,
-                                 graph_conv=SAGEConvV2,
+                                 graph_conv=graph_conv,
                                  in_edge_channel=in_edge_channel,
                                  mid_edge_channel=mid_edge_channel,aggr='softmax')
 
         # build decoder for attribute prediction
         self.decoder = DeeperGCN(enc_num_hidden, in_dim, 1, 1,
                                  dropout_ratio=0.1, embedding_layer=None,
-                                 graph_conv=SAGEConvV2,
+                                 graph_conv=graph_conv,
                                  in_edge_channel=mid_edge_channel,
                                  mid_edge_channel=in_edge_channel,aggr='softmax',decode=True)
 
@@ -238,7 +239,7 @@ class PreModel_Container(LightningModule):
                 verbose: bool = True,
                 my_logging: bool = False,
                 scheduler_ReduceLROnPlateau_tracking: str = 'mse',
-
+                graph_conv: MessagePassing = SAGEConvV2
                 ):
         super().__init__()
         self.save_hyperparameters()
@@ -270,7 +271,7 @@ class PreModel_Container(LightningModule):
         self.model = PreModel(self.in_dim,self.enc_mid_channel,self.num_layers,self.nhead,
                               self.nhead_out,self.in_edge_dim,self.enc_mid_edge_channel,self.mask_rate,
                               self.encoder_type,self.decoder_type,self.drop_edge_rate,self.replace_rate
-                              ,self.concat_hidden)
+                              ,self.concat_hidden,graph_conv=graph_conv)
         
         if self.verbose: print(self.model,)
         self.epoch_metrics = Struct(train=[],valid=[],test=[])  
