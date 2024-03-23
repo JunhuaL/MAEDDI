@@ -239,7 +239,6 @@ class SAGEConvV2(MessagePassing):
             if self.p and isinstance(self.p, Tensor):
                 self.p.data.fill_(self.initial_p)
 
-
     def message(self, x_i: Tensor,x_j: Tensor,edge_attr: OptTensor) -> Tensor:
         if edge_attr is None:
             x = t.cat([x_i,x_j],dim=-1)

@@ -98,8 +98,7 @@ class PreModel(nn.Module):
                                  dropout_ratio=0.1, embedding_layer=None,
                                  graph_conv=graph_conv,
                                  in_edge_channel=mid_edge_channel,
-                                 mid_edge_channel=in_edge_channel,aggr='softmax',decode=True)
-
+                                 mid_edge_channel=in_edge_channel,aggr='softmax',decode=graph_conv == SAGEConvV2)
         self.enc_mask_token = nn.Parameter(torch.zeros(1, in_dim))
         self.enc_edge_token = nn.Parameter(torch.zeros(1,in_edge_channel))
         
@@ -192,17 +191,11 @@ class PreModel(nn.Module):
         x_rep = self.encoder2decoder_nodes(node_rep)
         edge_rep = self.encoder2decoder_edges(edge_attr)
 
+        x_rep[mask_nodes] = 0
+        edge_rep[mask_edges] = 0
 
-        if self._decoder_type not in ("mlp", "linear"):
-            # * remask, re-mask
-            x_rep[mask_nodes] = 0
-            edge_rep[mask_edges] = 0
+        x_recon,edge_recon = self.decoder(x_rep, use_edge_index,edge_rep)
 
-
-        if self._decoder_type in ("mlp", "linear") :
-            x_recon = self.decoder(x_rep)
-        else:
-            x_recon,edge_recon = self.decoder(x_rep, use_edge_index,edge_rep)
         x_init = x.x[mask_nodes]
         x_rec = x_recon[mask_nodes]
 

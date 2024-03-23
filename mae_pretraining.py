@@ -23,7 +23,7 @@ if __name__ == '__main__':
     else:
         raise "Unsupported GNN unit"
     
-    model = PreModel_Container(119,128,n_layers,4,2,loss_fn='mse',graph_conv=gconv)
+    model = PreModel_Container(119,128,n_layers,loss_fn='mse',graph_conv=gconv)
 
     earlystopping_tracking = 'trn_loss'
     earlystopping_mode = 'min'
