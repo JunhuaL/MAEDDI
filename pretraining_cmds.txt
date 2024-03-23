@@ -1,0 +1,6 @@
+python molconf_pretraining.py 40 4 random molconf RGCN
+python molconf_pretraining.py 40 4 random molconf RGIN
+python mae_pretraining.py 40 4 random RGCN
+python mae_pretraining.py 40 4 random RGIN
+python clr_pretraining.py 40 4 random RGCN
+python clr_pretraining.py 40 4 random RGIN

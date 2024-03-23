@@ -13,7 +13,7 @@ if __name__ == '__main__':
     n_layers = int(sys.argv[2])
     split_strat = str(sys.argv[3])
     gconv = str(sys.argv[4])
-    save_folder = './dataset/Namiki/drug/processed/'
+    save_folder = './dataset/Namiki/drug/'
     datamodule = Large_PretrainingDataset(save_folder)
 
     if gconv == 'RGCN':
@@ -25,11 +25,11 @@ if __name__ == '__main__':
 
     model = PreModel_Container(119,128,n_layers,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse',graph_conv=gconv)
 
-    earlystopping_tracking = 'val_loss'
+    earlystopping_tracking = 'trn_loss'
     earlystopping_mode = 'min'
     earlystopping_min_delta = 0.0001
 
-    save_model_folder = f'./model_checkpoints/mae_epoch_{n_epochs}_layers_{n_layers}_{split_strat}/'
+    save_model_folder = f'./model_checkpoints/mae_epoch_{gconv}_{n_epochs}_layers_{n_layers}_{split_strat}/'
 
     checkpoint_callback = pl_callbacks.ModelCheckpoint(dirpath=save_model_folder,
                                         mode = earlystopping_mode,
