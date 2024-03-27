@@ -54,7 +54,7 @@ class MyCrossEntropyLoss(t.nn.Module):
 class DeepDrug(nn.Module):
     def __init__(self,in_dim,enc_num_hidden,num_out_dim=1,out_activation_func = 'softmax',
                  dropout_ratio=0.1,num_layers = 22,
-                 entry1_seq_len=200,in_edge_channel=11,mid_edge_channel=128, linEval=False,use_seq=True,use_conf=True):
+                 entry1_seq_len=200,in_edge_channel=11,mid_edge_channel=128, linEval=False,use_seq=True,use_conf=True, g_conv=SAGEConvV2):
         super(DeepDrug,self).__init__()
         self.use_conf = use_conf
         self.use_seq = use_seq
@@ -64,13 +64,13 @@ class DeepDrug(nn.Module):
         if use_conf:
             self.gconv1 = DeeperGCN(in_dim,enc_num_hidden,num_layers,1,
                                     dropout_ratio=0.1,embedding_layer=None,
-                                    graph_conv=SAGEConvV2,
+                                    graph_conv=g_conv,
                                     in_edge_channel=None,
                                     mid_edge_channel=mid_edge_channel,aggr='softmax')
             
             self.gconv1_conf = DeeperGCN(in_edge_channel,mid_edge_channel,num_layers,1,
                                       dropout_ratio=0.1,embedding_layer=None,
-                                      graph_conv=SAGEConvV2,
+                                      graph_conv=g_conv,
                                       in_edge_channel=6,
                                       mid_edge_channel=mid_edge_channel, aggr='softmax')
             dim_gconv1_out = enc_num_hidden + mid_edge_channel
@@ -79,8 +79,8 @@ class DeepDrug(nn.Module):
         else:
             self.gconv1 = DeeperGCN(in_dim, enc_num_hidden, num_layers,1,
                                     dropout_ratio=0.1,embedding_layer=None,
-                                    graph_conv=RGINConv,
-                                    in_edge_channel=None if not use_seq else in_edge_channel,
+                                    graph_conv=g_conv,
+                                    in_edge_channel= in_edge_channel,
                                     mid_edge_channel=mid_edge_channel,aggr='softmax')
             dim_gconv1_out = enc_num_hidden
         
@@ -173,7 +173,7 @@ class DeepDrug_Container(LightningModule):
     def __init__(self,num_out_dim=1, task_type = 'multi_classification',
                  lr = 0.001, category = None, verbose=True, my_logging=False, 
                  scheduler_ReduceLROnPlateau_tracking='mse',
-                 model_type = 'deepdrug', linEval=False, n_layers=22,use_seq=True, use_conf=False):
+                 model_type = 'deepdrug', linEval=False, n_layers=22,use_seq=True, use_conf=False, g_conv=SAGEConvV2):
         super().__init__()
 
         self.save_hyperparameters()
@@ -213,7 +213,8 @@ class DeepDrug_Container(LightningModule):
             self.model = DeepDrug(num_out_dim=num_out_dim,out_activation_func = out_activation_func,
                                 in_dim=self.entry2_in_channel,enc_num_hidden=128,num_layers=self.entry2_num_graph_layer,
                                 entry1_seq_len=self.entry2_seq_len,in_edge_channel=self.entry2_in_edge_channel,
-                                mid_edge_channel=128, linEval = linEval,dropout_ratio=0.2,use_seq=use_seq,use_conf=use_conf
+                                mid_edge_channel=128, linEval = linEval,dropout_ratio=0.2,use_seq=use_seq,use_conf=use_conf,
+                                g_conv = g_conv
                                 )
         else:
             raise

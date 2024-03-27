@@ -25,7 +25,7 @@ if __name__ == '__main__':
     
     model = PreModel_Container(119,128,n_layers,loss_fn='mse',graph_conv=gconv)
 
-    earlystopping_tracking = 'trn_loss'
+    earlystopping_tracking = 'train_loss'
     earlystopping_mode = 'min'
     earlystopping_min_delta = 0.0001
 

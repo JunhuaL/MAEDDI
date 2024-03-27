@@ -11,6 +11,7 @@ from pytorch_lightning import Trainer
 from MolConfSSL import PreModel_Container
 from LinEvalModel import DeepDrug_Container
 from dataset import DeepDrug_Dataset
+from DeepGCN import SAGEConvV2, RGINConv
 from utils import * 
 
 def get_parser(parser=None):
@@ -55,12 +56,15 @@ if __name__ == '__main__':
     lin_Eval = args.lin_eval
     n_layers = args.n_layers
     n_confs = args.n_confs
+    g_conv = args.__dict__.get('g_conv')
     lr = args.__dict__.get('lr')
     y_transform_func = None
 
+    g_conv = SAGEConvV2 if (g_conv is None) or (g_conv == "RGCN") else RGINConv
+    print(g_conv)
     if args.task in ['binary','multiclass','multilabel']:
-        scheduler_ReduceLROnPlateau_tracking = 'F1'
-        earlystopping_tracking = "val_epoch_F1"
+        scheduler_ReduceLROnPlateau_tracking = 'auPRC' if dataset == 'DrugBank' else 'F1'
+        earlystopping_tracking = "val_epoch_auPRC" if dataset == 'DrugBank' else 'val_epoch_F1'
     else:
         earlystopping_tracking='val_loss'
         scheduler_ReduceLROnPlateau_tracking= 'mse'
@@ -99,14 +103,16 @@ if __name__ == '__main__':
                             n_layers = n_layers,
                             use_seq = True if entry2_seq_file else False,
                             use_conf = n_confs > 0,
-                            lr=lr
+                            lr=lr,
+                            g_conv = g_conv
                             )
     
     if gconv_ckpt:
         model_type = 'mae' if 'mae' in gconv_ckpt else 'clr'
         model_type = 'molconf' if 'molconf_molconf' in gconv_ckpt else 'clr'
         loss_func = 'mse' if model_type == 'mae' else 'ntxent'
-        empty_rgcn = PreModel_Container(119,128,n_layers,in_edge_channel=12,ssl_framework=model_type,scheduler_ReduceLROnPlateau_tracking=loss_func)
+        empty_rgcn = PreModel_Container(119,128,n_layers,in_edge_channel=11,ssl_framework=model_type,
+                                        scheduler_ReduceLROnPlateau_tracking=loss_func, graph_conv=g_conv)
         empty_rgcn.load_from_checkpoint(gconv_ckpt)
         model.model.gconv1.load_state_dict(empty_rgcn.model.mol_encoder.state_dict())
         if model_type in ['clr','mae']:
@@ -115,8 +121,9 @@ if __name__ == '__main__':
     if lin_Eval:
         for param in model.model.gconv1.parameters():
             param.requires_grad = False
-        for param in model.model.gconv1_conf.parameters():
-            param.requires_grad = False
+        if model_type in ['clr','mae']:
+            for param in model.model.gconv1_conf.parameters():
+                param.requires_grad = False
     
     if earlystopping_tracking in ['val_loss',]:
         earlystopping_tracking = earlystopping_tracking

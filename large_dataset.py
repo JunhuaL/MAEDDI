@@ -206,7 +206,7 @@ class Large_ConfDataset(InMemoryDataset):
         if data_type == 'conf':
             featurizer = ConfGraphFeaturizer(n_bins)
         else:
-            featurizer = MolGraphConvFeaturizer(False,True,True)
+            featurizer = MolGraphConvFeaturizer(True,True,True)
             
         print("Initialization complete")
         for p in range(total_partitions):

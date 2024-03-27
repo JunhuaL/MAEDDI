@@ -450,23 +450,31 @@ class SeqDataset(data.Dataset):
         self.entryIDs= self.df.index.values 
         self.num_samples = self.df.shape[0]
 
+        new_entry_dict = {}
+        self.data = []
         if onehot:
             self.encoder = OneHotEncoder(sparse=False).fit(np.arange(len(word_dict)).reshape(-1, 1))
             # self.entry_dict = {k:self.encoder.transform(np.reshape(v,(-1,1))).transpose() for k,v in self.entry_dict.items()} #[seq_len,num_embed,]-> [num_embed,seq_len] 
-            self.org_entry_dict  = deepcopy(self.entry_dict )
-            self.entry_dict  = {}
-
+            # self.org_entry_dict  = deepcopy(self.entry_dict )
+            # self.entry_dict  = {}
+            for idx,entryID in enumerate(self.entryIDs):
+                new_entry_dict[entryID] = idx
+                self.data.append(self.encoder.transform(np.reshape(self.entry_dict[entryID],(-1,1))).transpose())
+            self.entry_dict = new_entry_dict
+            self.data = t.tensor(self.data,dtype=t.float)
 
     def __getitem__(self, idx):
         entryID = self.entryIDs[idx]
-        if self.onehot and (entryID not in self.entry_dict) :
-            self.entry_dict[entryID] = self.encoder.transform(np.reshape(self.org_entry_dict[entryID],(-1,1))).transpose()
-        data = self.entry_dict[entryID]
+        return self.data[self.entry_dict[entryID]]
+        # entryID = self.entryIDs[idx]
+        # if self.onehot and (entryID not in self.entry_dict) :
+        #     self.entry_dict[entryID] = self.encoder.transform(np.reshape(self.org_entry_dict[entryID],(-1,1))).transpose()
+        # data = self.entry_dict[entryID]
 
-        if self.onehot:
-            return t.Tensor(data).float()
-        else:
-            return t.Tensor(data).long()
+        # if self.onehot:
+        #     return t.Tensor(data).float()
+        # else:
+        #     return t.Tensor(data).long()
         
     def __len__(self):
         return self.num_samples

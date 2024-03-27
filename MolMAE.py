@@ -98,7 +98,7 @@ class PreModel(nn.Module):
                                  dropout_ratio=0.1, embedding_layer=None,
                                  graph_conv=graph_conv,
                                  in_edge_channel=mid_edge_channel,
-                                 mid_edge_channel=in_edge_channel,aggr='softmax',decode=graph_conv == SAGEConvV2)
+                                 mid_edge_channel=in_edge_channel,aggr='softmax',decode=True)
         self.enc_mask_token = nn.Parameter(torch.zeros(1, in_dim))
         self.enc_edge_token = nn.Parameter(torch.zeros(1,in_edge_channel))
         
