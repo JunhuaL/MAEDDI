@@ -2,6 +2,6 @@
 *.ipynb
 *.ckpt
 *.sdf
-/dataset/Chemberta/**
-/model_checkpoints/**
-/output/**
+./model_checkpoints/**
+./output/**
+./logs/**
