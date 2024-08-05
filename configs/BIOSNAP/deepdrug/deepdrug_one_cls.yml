@@ -1,0 +1,17 @@
+dataset:  BIOSNAP
+task: binary 
+category: DDI
+entry1_file: ./dataset/BIOSNAP/drug/processed/data.pt
+entry2_file: ./dataset/BIOSNAP/drug/processed/data.pt
+entry1_seq_file: ./dataset/BIOSNAP/drug/drug.csv
+entry2_seq_file: ./dataset/BIOSNAP/drug/drug.csv
+pair_file: ./dataset/BIOSNAP/binary_1vs1/entry_pairs.csv
+label_file: ./dataset/BIOSNAP/binary_1vs1/pair_labels.csv
+save_folder: ./output/deepdrug/BIOSNAP/binary_1vs1/one_cluster/
+split_strategy: whole_cluster_sampling
+lin_eval: False
+model_type: deepdrug
+gpus: 0
+num_out_dim: 1
+n_layers: 22
+n_confs: 0

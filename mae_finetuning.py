@@ -14,6 +14,7 @@ from MolMAE import PreModel_Container
 from LinEvalModel import DeepDrug_Container
 from dataset import DeepDrug_Dataset
 from utils import * 
+from DeepGCN import SAGEConvV2,RGINConv
 
 def get_parser(parser=None):
     if parser == None:
@@ -58,9 +59,11 @@ if __name__ == '__main__':
     gconv_ckpt = args.__dict__.get('gconv_ckpt')
     lin_Eval = args.lin_eval
     n_layers = args.n_layers
-
+    g_conv = args.__dict__.get('g_conv')
+    lr = args.__dict__.get('lr')
     y_transfrom_func = None
 
+    g_conv = SAGEConvV2 if (g_conv is None) or (g_conv == "RGCN") else RGINConv
     if args.task in ['binary','multiclass','multilabel']:
         scheduler_ReduceLROnPlateau_tracking = 'F1'
         earlystopping_tracking = "val_epoch_F1"
@@ -102,11 +105,14 @@ if __name__ == '__main__':
                             scheduler_ReduceLROnPlateau_tracking=scheduler_ReduceLROnPlateau_tracking,
                             num_out_dim = num_out_dim, model_type=model_type,
                             n_layers = n_layers,
-                            use_seq = True if entry2_seq_file else False
+                            use_seq = True if entry2_seq_file else False,
+                            use_conf=False,
+                            lr=lr,
+                            g_conv= g_conv
                             )
 
     if gconv_ckpt:
-        empty_rgcn = PreModel_Container(119,128,n_layers,4,2,encoder_type='deepgcn',decoder_type='deepgcn',loss_fn='mse')
+        empty_rgcn = PreModel_Container(119,128,n_layers,loss_fn='mse',graph_conv=g_conv)
         empty_rgcn.load_from_checkpoint(gconv_ckpt)
         model.model.gconv1.load_state_dict(empty_rgcn.model.encoder.state_dict())
 
@@ -143,7 +149,7 @@ if __name__ == '__main__':
                     check_val_every_n_epoch=1,
                     callbacks=  [checkpoint_callback,
                                 earlystop_callback,],
-                    # enable_progress_bar=False,
+                    enable_progress_bar=False,
                     )
     trainer.fit(model, datamodule=datamodule,)
 

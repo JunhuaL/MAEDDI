@@ -38,7 +38,6 @@ rsync -rvhz --partial --inplace /home/s1950841/MAEDDI/dataset/Chemberta/drug/pro
 cd /disk/scratch/s1950841
 rsync -vhz --partial --inplace /home/s1950841/MAEDDI/*.py .
 
-
 python SeqGraphCLR_pretraining.py 80 4 random
 
 rsync -rvhz ./model_checkpoints /home/s1950841/MAEDDI/

@@ -395,4 +395,5 @@ class DeepDrug_Container(LightningModule):
                                 mode= mode,#'min',
                                 factor=0.1, patience=8, verbose=True, 
                                 threshold=0.0001, threshold_mode='abs', )
+        # self.my_schedulers = t.optim.lr_scheduler.ExponentialLR(self.my_optimizers,0.995)
         return self.my_optimizers 

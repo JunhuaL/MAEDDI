@@ -1,6 +1,11 @@
 #!/bin/bash
-echo "Job running on ${SLURM_JOB_NODELIST}"
+#SBATCH --partition=PGR-Standard
+#SBATCH --time=2-5:00:00
+#SBATCH --mem=24000
+#SBATCH --cpus-per-task=4
+#SBATCH --gres=gpu:1
 
+echo "Job running on ${SLURM_JOB_NODELIST}"
 dt=$(date '+%d/%m/%Y %H:%M:%S')
 echo "Job started: $dt"
 

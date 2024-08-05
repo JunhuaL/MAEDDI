@@ -1,31 +1,16 @@
 import numpy as np 
 import pandas as pd
-import multiprocessing as mp
-from copy import deepcopy
 from torch_geometric.data import (InMemoryDataset, Data,DataLoader)
-from torch_geometric.utils import (dense_to_sparse,to_undirected,add_self_loops,remove_self_loops,degree)
+from torch_geometric.utils import (dense_to_sparse,add_self_loops,remove_self_loops)
 import os 
-from copy import deepcopy
-from collections import defaultdict,Counter,OrderedDict
-from functools import reduce
 import pickle as pkl
-from itertools import product
 import numpy as np
-import evaluation
+import utils.evaluation as evaluation
 import pandas as pd
-from typing import Optional, List, NamedTuple
-import matplotlib.pyplot as plt
-from time import sleep 
+from typing import Optional 
 import torch
-import torch as t 
-from torch import Tensor
-import torch.nn.functional as F
-from torch import nn 
-from torch.nn import ModuleList, BatchNorm1d
-from torch.autograd import Variable
-from torch.utils.data.distributed import DistributedSampler 
+import torch as t  
 from molGraphConvFeaturizer import MolGraphConvFeaturizer as user_MolGraphConvFeaturizer
-
 
 from pytorch_lightning import (LightningDataModule,)
 
@@ -428,8 +413,7 @@ def trans_seqs(x,seq_dict,max_seq_len=200,upper=True):
     temp = [seq_dict[i] for i in temp]
     return temp
 from sklearn.preprocessing import OneHotEncoder
-# enc_protein = OneHotEncoder().fit(np.array(amino_char).reshape(-1, 1))
-# enc_drug = OneHotEncoder().fit(np.array(smiles_char).reshape(-1, 1))
+
 class SeqDataset(data.Dataset):
     def __init__(self,data_file,max_len=200,data_type='protein',onehot=False ):
         if data_type == 'protein':
@@ -454,9 +438,6 @@ class SeqDataset(data.Dataset):
         self.data = []
         if onehot:
             self.encoder = OneHotEncoder(sparse=False).fit(np.arange(len(word_dict)).reshape(-1, 1))
-            # self.entry_dict = {k:self.encoder.transform(np.reshape(v,(-1,1))).transpose() for k,v in self.entry_dict.items()} #[seq_len,num_embed,]-> [num_embed,seq_len] 
-            # self.org_entry_dict  = deepcopy(self.entry_dict )
-            # self.entry_dict  = {}
             for idx,entryID in enumerate(self.entryIDs):
                 new_entry_dict[entryID] = idx
                 self.data.append(self.encoder.transform(np.reshape(self.entry_dict[entryID],(-1,1))).transpose())
@@ -466,15 +447,6 @@ class SeqDataset(data.Dataset):
     def __getitem__(self, idx):
         entryID = self.entryIDs[idx]
         return self.data[self.entry_dict[entryID]]
-        # entryID = self.entryIDs[idx]
-        # if self.onehot and (entryID not in self.entry_dict) :
-        #     self.entry_dict[entryID] = self.encoder.transform(np.reshape(self.org_entry_dict[entryID],(-1,1))).transpose()
-        # data = self.entry_dict[entryID]
-
-        # if self.onehot:
-        #     return t.Tensor(data).float()
-        # else:
-        #     return t.Tensor(data).long()
         
     def __len__(self):
         return self.num_samples
@@ -524,8 +496,6 @@ class PairedDataset_v1(t.utils.data.Dataset):#需要继承data.Dataset
         
     def __len__(self):
         return self.num_samples
-
-
 
 class DeepDrug_Dataset(LightningDataModule):
     def __init__(self,entry1_data_folder,entry2_data_folder,entry_pairs_file,
@@ -697,6 +667,8 @@ class DeepDrug_Dataset(LightningDataModule):
                 self.train_indexs  = tmp_indexs[:int(num_samples*0.7)]
                 self.valid_indexs = tmp_indexs[int(num_samples*0.7):int(num_samples*0.8)]
                 self.test_indexs = tmp_indexs[int(num_samples*0.8):]
+            elif self.split_strat == 'presplit':
+                pass
             else:
                 raise ValueError(self.split_strat +"is not an available split strategy.")
 
@@ -796,141 +768,5 @@ class Pretraining_Dataset(LightningDataModule):
         print('in test dataloader...')
         test_ids = self.dataset.entryIDs[self.test_indxs]
         test_split = MolDataset(self.dataset,test_ids)
-        dataloader = DataLoader(test_split,num_workers=0,shuffle=False,batch_size=self.batch_size,drop_last=True)
-        return dataloader
-    
-class SMILES_DataModule(LightningDataModule):
-    def __init__(self,datafile,batch_size,data_type,split_strat,max_len=200):
-        super().__init__()
-        self.datafile = datafile
-        self.batch_size = batch_size
-        self.data_type = data_type
-        self.max_len = max_len
-        self.split_strat = split_strat
-    
-    def prepare_data(self):
-        pass
-    
-    def my_prepare_data(self):
-        print(self.data_type)
-        self.dataset = SeqDataset(self.datafile, self.max_len, self.data_type, onehot=True)
-        self.data_split = evaluation.Split_Strats(None,self.datafile,clustering='cluster' in self.split_strat)
-        if self.split_strat == 'random':
-            num_samples = len(self.dataset)
-            tmp_indxs = np.random.permutation(num_samples)
-            self.train_indxs = tmp_indxs[:int(num_samples*0.8)]
-            self.valid_indxs = tmp_indxs[int(num_samples*0.8):]
-        elif self.split_strat == 'sample_from_all_clusters':
-            train,evals = self.data_split.all_cluster_split_pretrain()
-            self.train_indxs = train.index
-            self.valid_indxs = evals.index
-        elif self.split_strat == 'whole_cluster_sampling':
-            train,evals = self.data_split.chosen_cluster_split_pretrain()
-            self.train_indxs = train.index
-            self.valid_indxs = evals.index
-        else:
-            raise
-    
-    def setup(self, stage=None):
-        self.my_prepare_data()
-        pass
-    
-    def train_dataloader(self):
-        print('in train dataloader...')
-        train_ids = self.dataset.entryIDs[self.train_indxs]
-        train_split = SeqDataset(self.datafile, self.max_len, self.data_type, onehot=True)
-        train_split.entryIDs = train_ids
-        train_split.num_samples = len(train_split.entryIDs)
-        dataloader = DataLoader(train_split,num_workers=0,shuffle=True,batch_size=64,pin_memory=True)
-        return dataloader
-    
-    def val_dataloader(self):
-        print('in val dataloader...')
-        valid_ids = self.dataset.entryIDs[self.valid_indxs]
-        valid_split = SeqDataset(self.datafile, self.max_len, self.data_type, onehot=True)
-        valid_split.entryIDs = valid_ids
-        valid_split.num_samples = len(valid_split.entryIDs)
-        dataloader = DataLoader(valid_split,num_workers=0,shuffle=False,batch_size=64)
-        return dataloader
-    
-    def test_dataloader(self):
-        print('in test dataloader...')
-        test_ids = self.dataset.entryIDs[self.test_indxs]
-        test_split = SeqDataset(self.datafile, self.max_len, self.data_type, onehot=True)
-        dataloader = DataLoader(test_split,num_workers=0,shuffle=False,batch_size=64)
-        return dataloader
-
-class MolSeq_Split_Data(t.utils.data.Dataset):
-    def __init__(self,dataset,entry_ids):
-        self.dataset = dataset
-        self.dataset_entry_ids = dataset.entryIDs.tolist()
-        self.entry_ids = entry_ids
-        self.num_samples = len(entry_ids)
-    
-    def __getitem__(self,idx):
-        return self.dataset[self.dataset_entry_ids.index(self.entry_ids[idx])]
-    
-    def __len__(self):
-        return self.num_samples
-
-class MolSeq_Dataset(LightningDataModule):
-    def __init__(self,data_folder,batch_size=128,task_type='pretrain',split_strat='random',partition='data'):
-        super().__init__()
-        self.data_folder = data_folder
-        self.batch_size = batch_size
-        self.task_type = task_type
-        self.split_strat = split_strat
-    
-    def prepare_data(self):
-        pass
-
-    def my_prepare_data(self):
-        self.dataset = EntryDataset(self.data_folder)    
-        self.dataset.add_node_degree()
-
-        self.seq_dataset = SeqDataset(self.data_folder+'drug.csv',data_type='drug',onehot=True)        
-        self.dataset = MultiEmbedDataset_v1(self.dataset,self.seq_dataset)
-
-        self.data_split = evaluation.Split_Strats(None,self.data_folder+'drug.csv',
-                                                  clustering='cluster' in self.split_strat,)
-        
-        if self.split_strat == 'random':
-            num_samples = len(self.dataset)
-            tmp_indxs = np.random.permutation(num_samples)
-            self.train_indxs = tmp_indxs[:int(num_samples*0.8)]
-            self.valid_indxs = tmp_indxs[int(num_samples*0.8):]
-        elif self.split_strat == 'sample_from_all_clusters':
-            train,evals = self.data_split.all_cluster_split_pretrain()
-            self.train_indxs = train.index
-            self.valid_indxs = evals.index
-        elif self.split_strat == 'whole_cluster_sampling':
-            train,evals = self.data_split.chosen_cluster_split_pretrain()
-            self.train_indxs = train.index
-            self.valid_indxs = evals.index
-        else:
-            raise
-    
-    def setup(self, stage=None):
-        self.my_prepare_data()
-        pass
-    
-    def train_dataloader(self):
-        print('in train dataloader...')
-        train_ids = self.dataset.entryIDs[self.train_indxs]
-        train_split = MolSeq_Split_Data(self.dataset,train_ids)
-        dataloader = DataLoader(train_split,num_workers=0,shuffle=True,batch_size=self.batch_size,pin_memory=True,drop_last=True)
-        return dataloader
-    
-    def val_dataloader(self):
-        print('in val dataloader...')
-        valid_ids = self.dataset.entryIDs[self.valid_indxs]
-        valid_split = MolSeq_Split_Data(self.dataset,valid_ids)
-        dataloader = DataLoader(valid_split,num_workers=0,shuffle=False,batch_size=self.batch_size,drop_last=True)
-        return dataloader
-    
-    def test_dataloader(self):
-        print('in test dataloader...')
-        test_ids = self.dataset.entryIDs[self.test_indxs]
-        test_split = MolSeq_Split_Data(self.dataset,test_ids)
         dataloader = DataLoader(test_split,num_workers=0,shuffle=False,batch_size=self.batch_size,drop_last=True)
         return dataloader

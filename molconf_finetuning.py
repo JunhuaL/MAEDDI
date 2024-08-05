@@ -63,8 +63,8 @@ if __name__ == '__main__':
     g_conv = SAGEConvV2 if (g_conv is None) or (g_conv == "RGCN") else RGINConv
     print(g_conv)
     if args.task in ['binary','multiclass','multilabel']:
-        scheduler_ReduceLROnPlateau_tracking = 'auPRC' if dataset == 'DrugBank' else 'F1'
-        earlystopping_tracking = "val_epoch_auPRC" if dataset == 'DrugBank' else 'val_epoch_F1'
+        scheduler_ReduceLROnPlateau_tracking = 'F1'
+        earlystopping_tracking = 'val_epoch_F1'
     else:
         earlystopping_tracking='val_loss'
         scheduler_ReduceLROnPlateau_tracking= 'mse'
@@ -146,8 +146,8 @@ if __name__ == '__main__':
     trainer = Trainer(
                     gpus=[gpus,],
                     accelerator=None,
-                    max_epochs=50, min_epochs=5,
-                    default_root_dir= save_folder,
+                    max_epochs=100, min_epochs=5,
+                    default_rootdir= save_folder,
                     fast_dev_run=False,
                     check_val_every_n_epoch=1,
                     callbacks=  [checkpoint_callback,

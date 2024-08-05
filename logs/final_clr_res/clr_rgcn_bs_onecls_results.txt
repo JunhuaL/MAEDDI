@@ -1,0 +1,206 @@
+Namespace(configfile='./configs/BIOSNAP/clr/4_clr_onecls_RGCN.yml')
+{'dataset': 'BIOSNAP', 'task': 'binary', 'category': 'DDI', 'entry1_file': './dataset/BIOSNAP/drug/processed/data.pt', 'entry2_file': './dataset/BIOSNAP/drug/processed/data.pt', 'entry1_seq_file': './dataset/BIOSNAP/drug/drug.csv', 'pair_file': './dataset/BIOSNAP/binary_1vs1/entry_pairs.csv', 'label_file': './dataset/BIOSNAP/binary_1vs1/pair_labels.csv', 'save_folder': './output/CLR/RGCN/BIOSNAP/binary_1vs1/one_cluster/', 'split_strategy': 'whole_cluster_sampling', 'gconv_ckpt': './model_checkpoints/clr_epoch_RGCN_20_layers_4_random/last.ckpt', 'lin_eval': False, 'model_type': 'deepdrug', 'gpus': 0, 'num_out_dim': 1, 'n_layers': 4, 'g_conv': 'RGCN', 'lr': 0.0001}
+print parameters:
+{
+  "earlystopping_tracking": "val_epoch_F1",
+  "entry1_data_folder": "./dataset/BIOSNAP/drug",
+  "entry1_seq_file": "./dataset/BIOSNAP/drug/drug.csv",
+  "entry2_data_folder": "./dataset/BIOSNAP/drug",
+  "entry2_seq_file": null,
+  "entry_pairs_file": "./dataset/BIOSNAP/binary_1vs1/entry_pairs.csv",
+  "gpus": 0,
+  "model_type": "deepdrug",
+  "pair_labels_file": "./dataset/BIOSNAP/binary_1vs1/pair_labels.csv",
+  "save_folder": "./output/CLR/RGCN/BIOSNAP/binary_1vs1/one_cluster/",
+  "scheduler_ReduceLROnPlateau_tracking": "F1",
+  "split_strat": "whole_cluster_sampling",
+  "task_type": "binary",
+  "y_pred_file": "./output/CLR/RGCN/BIOSNAP/binary_1vs1/one_cluster/test_pred.csv",
+  "y_transfrom_func": null,
+  "y_true_file": "./output/CLR/RGCN/BIOSNAP/binary_1vs1/one_cluster/test_true.csv"
+}
+DeepDrug(
+  (gconv1): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=11, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (gconv2): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=11, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (global_fc_nn): Sequential(
+    (0): Linear(in_features=256, out_features=128, bias=True)
+    (1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): Dropout(p=0.2, inplace=False)
+    (3): ReLU()
+    (4): Linear(in_features=128, out_features=32, bias=True)
+    (5): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): Dropout(p=0.2, inplace=False)
+    (7): ReLU()
+  )
+  (fc2): Linear(in_features=32, out_features=1, bias=True)
+)
+preparing dataset...
+loading processed data...
+add degrees as node features for each sample...
+loading processed data...
+add degrees as node features for each sample...
+can not find cv_file,  whole_cluster_sampling ...
+0.6989643545279384
+0.11765414258188825
+0.1833815028901734
+in val dataloader...
+
+val:Ep0000|| F1: 0.832,auROC 0.507,auPRC: 0.765
+in train dataloader...
+
+val:Ep0000|| F1: 0.745,auROC 0.779,auPRC: 0.806
+
+trn:Ep0000|| F1: 0.707,auROC 0.774,auPRC: 0.754
+
+val:Ep0001|| F1: 0.640,auROC 0.795,auPRC: 0.823
+
+trn:Ep0001|| F1: 0.765,auROC 0.830,auPRC: 0.812
+
+val:Ep0002|| F1: 0.338,auROC 0.799,auPRC: 0.818
+
+trn:Ep0002|| F1: 0.791,auROC 0.858,auPRC: 0.843
+
+val:Ep0003|| F1: 0.786,auROC 0.823,auPRC: 0.857
+
+trn:Ep0003|| F1: 0.817,auROC 0.883,auPRC: 0.869
+
+val:Ep0004|| F1: 0.722,auROC 0.808,auPRC: 0.839
+
+trn:Ep0004|| F1: 0.836,auROC 0.904,auPRC: 0.893
+
+val:Ep0005|| F1: 0.816,auROC 0.850,auPRC: 0.871
+
+trn:Ep0005|| F1: 0.854,auROC 0.920,auPRC: 0.908
+
+val:Ep0006|| F1: 0.805,auROC 0.860,auPRC: 0.880
+
+trn:Ep0006|| F1: 0.866,auROC 0.932,auPRC: 0.923
+
+val:Ep0007|| F1: 0.798,auROC 0.849,auPRC: 0.874
+
+trn:Ep0007|| F1: 0.878,auROC 0.942,auPRC: 0.934
+
+val:Ep0008|| F1: 0.637,auROC 0.832,auPRC: 0.857
+Epoch    10: reducing learning rate of group 0 to 1.0000e-05.
+
+trn:Ep0008|| F1: 0.889,auROC 0.950,auPRC: 0.942
+
+val:Ep0009|| F1: 0.789,auROC 0.867,auPRC: 0.887
+
+trn:Ep0009|| F1: 0.902,auROC 0.959,auPRC: 0.955
+
+val:Ep0010|| F1: 0.778,auROC 0.866,auPRC: 0.885
+
+trn:Ep0010|| F1: 0.904,auROC 0.961,auPRC: 0.956
+
+val:Ep0011|| F1: 0.776,auROC 0.864,auPRC: 0.885
+
+trn:Ep0011|| F1: 0.906,auROC 0.962,auPRC: 0.955
+
+val:Ep0012|| F1: 0.793,auROC 0.871,auPRC: 0.891
+
+trn:Ep0012|| F1: 0.907,auROC 0.963,auPRC: 0.958
+
+val:Ep0013|| F1: 0.771,auROC 0.870,auPRC: 0.890
+
+trn:Ep0013|| F1: 0.909,auROC 0.963,auPRC: 0.958
+
+val:Ep0014|| F1: 0.811,auROC 0.869,auPRC: 0.889
+
+trn:Ep0014|| F1: 0.910,auROC 0.965,auPRC: 0.960
+
+val:Ep0015|| F1: 0.773,auROC 0.869,auPRC: 0.888
+loading best weight in C:\Users\junhu\Desktop\Dissertation\MAEDDI\output\CLR\RGCN\BIOSNAP\binary_1vs1\one_cluster\models\epoch=5-step=1362.ckpt ...
+DeepDrug(
+  (gconv1): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=11, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (gconv2): DeeperGCN(
+    (node_encoder): Sequential(
+      (0): Linear(in_features=121, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+    (gcn_blocks): ModuleList(
+      (0): ModuleList(
+        (0): DeepGCNLayerV2(block=res+)
+        (1): DeepGCNLayerV2(block=res+)
+        (2): DeepGCNLayerV2(block=res+)
+        (3): DeepGCNLayerV2(block=res+)
+      )
+    )
+    (edge_encoder): Sequential(
+      (0): Linear(in_features=11, out_features=128, bias=True)
+      (1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (global_fc_nn): Sequential(
+    (0): Linear(in_features=256, out_features=128, bias=True)
+    (1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): Dropout(p=0.2, inplace=False)
+    (3): ReLU()
+    (4): Linear(in_features=128, out_features=32, bias=True)
+    (5): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): Dropout(p=0.2, inplace=False)
+    (7): ReLU()
+  )
+  (fc2): Linear(in_features=32, out_features=1, bias=True)
+)
+in test dataloader...
+
+tst:Ep0016|| F1: 0.768,auROC 0.863,auPRC: 0.832
+------------------------------------------------------------------------------------------------------------------------
+       Test metric             DataLoader 0
+------------------------------------------------------------------------------------------------------------------------
+        test_loss           0.49918434023857117
+------------------------------------------------------------------------------------------------------------------------
+in test dataloader...
+save prediction completed.
